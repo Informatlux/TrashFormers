@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f2f5ea">
+
+    <ImageView
+        android:id="@+id/splashLogo"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/google_icon"
+        app:layout_constraintBottom_toTopOf="@+id/splashMotto"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/splashMotto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="120dp"
+        android:fontFamily="@font/product_sans"
+        android:textSize="60dp"
+        android:text="TrashFormers"
+        android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
+        android:textColor="#41682c"
+        app:layout_constraintBottom_toTopOf="@+id/splashFact"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/splashLogo" />
+
+    <TextView
+        android:id="@+id/splashFact"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Random sustainability fact..."
+        android:fontFamily="@font/product_sans"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:padding="24dp"
+        app:layout_constraintTop_toBottomOf="@id/splashMotto"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/splashProgress"/>
+
+    <!-- Loading indicator with a container -->
+    <com.google.android.material.loadingindicator.LoadingIndicator
+        android:id="@+id/splashProgress"
+        style="@style/Widget.Material3.LoadingIndicator.Contained"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:containerHeight="65dp"
+        app:containerWidth="65dp"
+        app:indicatorSize="50dp"
+        app:layout_constraintTop_toBottomOf="@id/splashFact"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:containerColor="#d9e7cb"
+        app:indicatorColor="#41682c"
+        android:layout_marginTop="120dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout> 

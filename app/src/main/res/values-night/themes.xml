@@ -1,0 +1,7 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Test" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Set the main background color -->
+        <item name="android:windowBackground">@drawable/background_gradient_green</item>
+    </style>
+</resources>

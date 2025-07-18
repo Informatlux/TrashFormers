@@ -1,0 +1,108 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Test" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:typeface">normal</item>
+        <item name="android:fontFamily">@font/product_sans</item>
+        <item name="fontFamily">@font/product_sans</item>
+        <item name="textAppearanceDisplayLarge">@style/ProductSans.DisplayLarge</item>
+        <item name="textAppearanceDisplayMedium">@style/ProductSans.DisplayMedium</item>
+        <item name="textAppearanceDisplaySmall">@style/ProductSans.DisplaySmall</item>
+        <item name="textAppearanceHeadlineLarge">@style/ProductSans.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/ProductSans.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/ProductSans.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/ProductSans.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/ProductSans.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/ProductSans.TitleSmall</item>
+        <item name="textAppearanceBodyLarge">@style/ProductSans.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/ProductSans.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/ProductSans.BodySmall</item>
+        <item name="textAppearanceLabelLarge">@style/ProductSans.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/ProductSans.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/ProductSans.LabelSmall</item>
+    </style>
+
+    <style name="ProductSans.DisplayLarge" parent="TextAppearance.Material3.DisplayLarge">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.DisplayMedium" parent="TextAppearance.Material3.DisplayMedium">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.DisplaySmall" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.HeadlineLarge" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.HeadlineMedium" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.HeadlineSmall" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.BodySmall" parent="TextAppearance.Material3.BodySmall">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.LabelMedium" parent="TextAppearance.Material3.LabelMedium">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ProductSans.LabelSmall" parent="TextAppearance.Material3.LabelSmall">
+        <item name="fontFamily">@font/product_sans</item>
+    </style>
+    <style name="ShapeAppearance.App.SmallComponent.18dp" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">6dp</item>
+    </style>
+    <style name="ShapeAppearance.App.TextInputLayout.Rounded" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
+        <!-- New Colors -->
+        <color name="my_red">#FF2D55</color>       <!-- rgb(255, 45, 85) -->
+        <color name="my_orange">#FF9500</color>     <!-- rgb(255, 149, 0) -->
+        <color name="my_yellow">#FFCC00</color>    <!-- rgb(255, 204, 0) -->
+        <color name="my_green_primary">#34C759</color> <!-- rgb(52, 199, 89) - Primary Green -->
+        <color name="my_teal">#00C7BE</color>       <!-- rgb(0, 199, 190) -->
+        <color name="my_cyan">#30B0C7</color>       <!-- rgb(48, 176, 199) -->
+        <color name="my_sky_blue">#32ADE6</color>    <!-- rgb(50, 173, 230) -->
+        <color name="my_blue_primary">#007AFF</color>   <!-- rgb(0, 122, 255) - Primary Blue -->
+        <color name="my_indigo">#5856D6</color>     <!-- rgb(88, 86, 214) -->
+        <color name="my_purple">#AF52DE</color>     <!-- rgb(175, 82, 222) -->
+
+        <!-- Theme Colors (Suggestions based on Green and Blue preference) -->
+        <color name="colorPrimary">@color/my_green_primary</color>
+        <color name="colorPrimaryVariant">@color/my_teal</color> <!-- Or a darker shade of my_green_primary -->
+        <color name="colorOnPrimary">#FFFFFF</color> <!-- White text on primary color -->
+
+        <color name="colorSecondary">@color/my_blue_primary</color>
+        <color name="colorSecondaryVariant">@color/my_sky_blue</color> <!-- Or a darker shade of my_blue_primary -->
+        <color name="colorOnSecondary">#FFFFFF</color> <!-- White text on secondary color -->
+
+        <color name="colorSurface">#FFFFFF</color> <!-- Or a light gray -->
+        <color name="colorOnSurface">#000000</color> <!-- Black text on surface -->
+        <color name="colorBackground">#F0F0F0</color> <!-- Or another light neutral -->
+        <color name="colorOnBackground">#000000</color> <!-- Black text on background -->
+        <color name="colorError">@color/my_red</color>
+        <color name="colorOnError">#FFFFFF</color>
+    </resources>
+

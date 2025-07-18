@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- The color is a semi-transparent white.
+         This is a key part of the glass effect. -->
+    <solid android:color="#5041682c" />
+
+    <!-- Rounded corners are a staple of Material Design. -->
+    <corners android:radius="22dp" />
+
+    <!-- A subtle border to catch the light. -->
+    <stroke
+        android:width="2dp"
+        android:color="#6641682c" /><!-- White border with some transparency -->
+</shape>

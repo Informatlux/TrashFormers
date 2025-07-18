@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Color when the text field is focused -->
+    <item android:color="#41682c" android:state_focused="true"/>
+    <!-- Default color for the hint -->
+    <item android:color="#41682c"/>
+</selector>

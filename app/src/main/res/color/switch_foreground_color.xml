@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- White text when checked -->
+    <item android:color="@android:color/white" android:state_checked="true"/>
+    <!-- Default text color when not checked -->
+    <item android:color="?attr/colorOnSurface"/>
+</selector>

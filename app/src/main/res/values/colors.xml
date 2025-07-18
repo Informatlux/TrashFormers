@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="splash_bg">#E6F4EA</color> <!-- pastel green -->
+    <color name="onboarding_bg">#F0F8F5</color> <!-- lighter pastel green -->
+    <color name="primary">#388E3C</color> <!-- Material green -->
+    <color name="secondary">#1976D2</color> <!-- Material blue -->
+    <color name="switch_checked_green">#41682C</color>
+    <!-- Primary Theme Colors -->
+    <color name="dark_background">#1C1C23</color>
+    <color name="primary_green">#00C853</color>
+    <color name="text_primary">#E0E0E0</color>
+    <color name="text_secondary">#9E9E9E</color>
+
+    <!-- Glassmorphism Colors -->
+    <color name="glass_white_10">#1AFFFFFF</color>
+    <color name="glass_white_20">#33FFFFFF</color>
+    <color name="glass_white_50">#80FFFFFF</color>
+
+    <!-- Toggle Button Colors -->
+    <color name="toggle_checked">#33353F</color>
+</resources>

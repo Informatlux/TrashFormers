@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Green background when checked -->
+    <item android:color="@color/switch_checked_green" android:state_checked="true"/>
+    <!-- Transparent background by default -->
+    <item android:color="#9041682c"/>
+</selector>
