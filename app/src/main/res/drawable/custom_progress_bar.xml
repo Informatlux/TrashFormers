@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This layer-list defines the two parts of the progress bar. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 1. The Background Track (the light grey part) -->
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/light_grey_card" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+
+    <!-- 2. The Progress Indicator (the green part) -->
+    <!-- The <clip> tag is essential; it allows the system to "reveal" this shape
+         as the progress value increases. -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <solid android:color="@color/map_primary_green" />
+                <corners android:radius="4dp" />
+            </shape>
+        </clip>
+    </item>
+
+</layer-list>

@@ -3,66 +3,164 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#f2f5ea">
+    android:background="#F8F9FA">
 
-    <ImageView
-        android:id="@+id/splashLogo"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:contentDescription="@string/app_name"
-        android:src="@drawable/google_icon"
-        app:layout_constraintBottom_toTopOf="@+id/splashMotto"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <!-- Gradient overlay for depth -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_gradient_apple"
+        android:alpha="0.3" />
 
-    <TextView
-        android:id="@+id/splashMotto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_marginTop="120dp"
-        android:fontFamily="@font/product_sans"
-        android:textSize="60dp"
-        android:text="TrashFormers"
-        android:textAppearance="@style/TextAppearance.Material3.DisplayMedium"
-        android:textColor="#41682c"
-        app:layout_constraintBottom_toTopOf="@+id/splashFact"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/splashLogo" />
-
-    <TextView
-        android:id="@+id/splashFact"
+    <!-- Main glass container with enhanced Apple styling -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/glass_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Random sustainability fact..."
-        android:fontFamily="@font/product_sans"
-        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-        android:textColor="@color/black"
-        android:gravity="center"
-        android:padding="24dp"
-        app:layout_constraintTop_toBottomOf="@id/splashMotto"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="24dp"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/splashProgress"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:strokeWidth="0dp"
+        app:cardBackgroundColor="#f9faf9">
 
-    <!-- Loading indicator with a container -->
-    <com.google.android.material.loadingindicator.LoadingIndicator
-        android:id="@+id/splashProgress"
-        style="@style/Widget.Material3.LoadingIndicator.Contained"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:containerHeight="65dp"
-        app:containerWidth="65dp"
-        app:indicatorSize="50dp"
-        app:layout_constraintTop_toBottomOf="@id/splashFact"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="48dp">
+
+            <!-- Logo with Apple-style shadow and glow -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/logo_container"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                app:cardCornerRadius="30dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="32dp"
+                app:cardBackgroundColor="#f9faf9">
+
+                <ImageView
+                    android:id="@+id/splashLogo"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/app_name"
+                    android:src="@drawable/google_icon"
+                    android:scaleType="centerInside" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- App name with SF Pro Display styling -->
+            <TextView
+                android:id="@+id/splashMotto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TrashFormers"
+                android:singleLine="true"
+                android:textSize="42sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/product_sans"
+                android:textColor="#1D1D1F"
+                android:letterSpacing="-0.02"
+                android:ellipsize="none"
+                android:gravity="center"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="24sp"
+                android:autoSizeMaxTextSize="44sp"
+                android:autoSizeStepGranularity="5sp"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Subtitle with Apple secondary text color -->
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Transforming Waste, Sustaining Future"
+                android:textSize="17sp"
+                android:fontFamily="@font/product_sans"
+                android:textColor="#86868B"
+                android:layout_marginBottom="40dp"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:lineSpacingExtra="2dp" />
+
+            <!-- Fact card with refined Apple-style design -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/fact_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="20dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="#F2F2F7"
+                android:layout_marginBottom="40dp">
+
+                <TextView
+                    android:id="@+id/splashFact"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Random sustainability fact..."
+                    android:fontFamily="@font/product_sans"
+                    android:textSize="15sp"
+                    android:textColor="#3A3A3C"
+                    android:gravity="center"
+                    android:padding="20dp"
+                    android:lineSpacingExtra="4dp" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Apple-style loading indicator -->
+            <com.google.android.material.loadingindicator.LoadingIndicator
+                android:id="@+id/splashProgress"
+                style="@style/Widget.Material3.LoadingIndicator.Contained"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:containerHeight="80dp"
+                app:containerWidth="80dp"
+                app:indicatorSize="60dp"
+                app:containerColor="#F2F2F7"
+                app:indicatorColor="#34C759" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Floating elements with Apple-style blur effect -->
+    <View
+        android:id="@+id/floating_element_1"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:background="@drawable/glass_morphism_background_enhanced"
+        android:alpha="0.15"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="20dp" />
+
+    <View
+        android:id="@+id/floating_element_2"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@drawable/glass_morphism_background_enhanced"
+        android:alpha="0.1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:containerColor="#d9e7cb"
-        app:indicatorColor="#41682c"
-        android:layout_marginTop="120dp"/>
+        android:layout_marginBottom="100dp"
+        android:layout_marginStart="40dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout> 
+    <View
+        android:id="@+id/floating_element_3"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@drawable/glass_morphism_background_enhanced"
+        android:alpha="0.08"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="120dp"
+        android:layout_marginStart="60dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

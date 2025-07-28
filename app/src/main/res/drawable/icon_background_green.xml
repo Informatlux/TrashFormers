@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This shape drawable creates a perfect circle (oval) with a solid light green fill. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- You can add this color to your colors.xml or use an existing light green -->
+    <solid android:color="#E8F5E9" />
+
+</shape>

@@ -2,22 +2,98 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="splash_bg">#E6F4EA</color> <!-- pastel green -->
-    <color name="onboarding_bg">#F0F8F5</color> <!-- lighter pastel green -->
-    <color name="primary">#388E3C</color> <!-- Material green -->
-    <color name="secondary">#1976D2</color> <!-- Material blue -->
+    <color name="splash_bg">#E6F4EA</color>
+    <color name="onboarding_bg">#F0F8F5</color>
+    <color name="primary">#388E3C</color>
+    <color name="secondary">#1976D2</color>
     <color name="switch_checked_green">#41682C</color>
-    <!-- Primary Theme Colors -->
+    <color name="sustainable_green">#34C759</color>
+
+    <color name="ai_background">#F9F9FB</color>
+    <color name="ai_card_background">#FFFFFF</color>
+    <color name="ai_card_border">#EAEAEB</color>
+    <color name="ai_primary_green">#1DB954</color>
+    <color name="ai_primary_green_dark">#148F3F</color>
+    <color name="ai_text_primary">#191414</color>
+    <color name="ai_text_secondary">#757575</color>
+
+    <color name="light_grey_background">#F7F8F9</color>
+    <color name="light_grey_card">#F0F1F3</color>
+    <color name="primary_green_dark">#2E7D32</color>
+    <color name="text_primary_dark">#1D1D1F</color>
+    <color name="text_secondary_grey">#8A8A8E</color>
+
+    <color name="map_background">#F5F5F5</color>
+    <color name="map_primary_green">#4CAF50</color>
+    <color name="map_primary_green_dark">#2E7D32</color>
+    <color name="map_text_primary">#212121</color>
+    <color name="map_text_secondary">#757575</color>
+    <color name="map_info_box_background">#E8F5E9</color>
+    <color name="map_info_box_stroke">#BDBDBD</color>
+
+    <color name="article_background">#F7F8F9</color>
+    <color name="article_card_background">#FFFFFF</color>
+    <color name="article_text_primary">#1D1D1F</color>
+    <color name="article_text_secondary">#8A8A8E</color>
+    <color name="article_accent_green">#34C759</color>
+    <color name="article_divider_grey">#E5E5E5</color>
+
+    <!-- Apple-Inspired Color Palette -->
+    <color name="apple_primary">#007AFF</color>
+    <color name="apple_secondary">#34C759</color>
+    <color name="apple_accent">#FF3B30</color>
+    <color name="apple_background">#F2F2F7</color>
+    <color name="apple_surface">#FFFFFF</color>
+
+    <!-- Text Colors -->
+    <color name="apple_text_primary">#1D1D1F</color>
+    <color name="apple_text_secondary">#86868B</color>
+    <color name="apple_text_hint">#8E8E93</color>
+
+    <!-- Glass Morphism Colors -->
+    <color name="apple_glass_background">#E6FFFFFF</color>
+    <color name="apple_glass_border">#33FFFFFF</color>
+    <color name="apple_input_background">#F2F2F7</color>
+    <color name="apple_social_background">#F9F9F9</color>
+
+    <!-- Toggle and Button Colors -->
+    <color name="apple_toggle_background">#E5E5EA</color>
+    <color name="apple_divider">#D1D1D6</color>
+    <color name="apple_icon_tint">#8E8E93</color>
+
+    <!-- Previous Colors -->
     <color name="dark_background">#1C1C23</color>
     <color name="primary_green">#00C853</color>
     <color name="text_primary">#E0E0E0</color>
     <color name="text_secondary">#9E9E9E</color>
-
-    <!-- Glassmorphism Colors -->
     <color name="glass_white_10">#1AFFFFFF</color>
     <color name="glass_white_20">#33FFFFFF</color>
     <color name="glass_white_50">#80FFFFFF</color>
-
-    <!-- Toggle Button Colors -->
     <color name="toggle_checked">#33353F</color>
+
+    <!-- New Colors -->
+    <color name="my_red">#FF2D55</color>
+    <color name="my_orange">#FF9500</color>
+    <color name="my_yellow">#FFCC00</color>
+    <color name="my_green_primary">#34C759</color>
+    <color name="my_teal">#00C7BE</color>
+    <color name="my_cyan">#30B0C7</color>
+    <color name="my_sky_blue">#32ADE6</color>
+    <color name="my_blue_primary">#007AFF</color>
+    <color name="my_indigo">#5856D6</color>
+    <color name="my_purple">#AF52DE</color>
+
+    <!-- Theme Colors -->
+    <color name="colorPrimary">@color/my_green_primary</color>
+    <color name="colorPrimaryVariant">@color/my_teal</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorSecondary">@color/my_blue_primary</color>
+    <color name="colorSecondaryVariant">@color/my_sky_blue</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorOnSurface">#000000</color>
+    <color name="colorBackground">#F0F0F0</color>
+    <color name="colorOnBackground">#000000</color>
+    <color name="colorError">@color/my_red</color>
+    <color name="colorOnError">#FFFFFF</color>
 </resources>

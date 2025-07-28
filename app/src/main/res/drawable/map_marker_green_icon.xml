@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This layer-list creates the final icon by stacking the pin and the trash icon. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Layer 1: The green pin shape we created in Step 1. -->
+    <item android:drawable="@drawable/map_pin_background" />
+
+    <!-- Layer 2: The white trash icon.
+         The insets (padding) are adjusted to place the icon perfectly
+         inside the "head" of the pin shape, away from the tail. -->
+    <item
+        android:drawable="@drawable/trash_icon_white"
+        android:left="32dp"
+        android:right="32dp"
+        android:top="20dp"
+        android:bottom="36dp" />
+
+</layer-list>
