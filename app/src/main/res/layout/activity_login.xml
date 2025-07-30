@@ -195,7 +195,7 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Email Field with enhanced styling -->
+                <!-- Password Field Layout with Password Visibility Toggle -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/layout_password"
                     android:layout_width="0dp"
@@ -212,11 +212,14 @@
                     app:boxStrokeWidth="0dp"
                     app:boxStrokeWidthFocused="2dp"
                     app:hintTextColor="@color/apple_text_hint"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/layout_email"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:startIconDrawable="@drawable/password_25"
-                    app:startIconTint="@color/apple_icon_tint">
+                    app:startIconTint="@color/apple_icon_tint"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/invisible_icon"
+                    app:endIconContentDescription="Toggle password visibility">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/input_password"
@@ -227,7 +230,26 @@
                         android:textColor="@color/apple_text_primary"
                         android:textSize="16sp" />
 
+
+
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Forgot Password hidden TextView -->
+                <TextView
+                    android:id="@+id/text_forgot_password"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Forgot password?"
+                    android:textColor="@color/sustainable_green"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/product_sans"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:layout_constraintTop_toBottomOf="@id/layout_password"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
 
                 <!-- Create Account Button with Apple-style design -->
                 <com.google.android.material.button.MaterialButton
@@ -248,101 +270,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/layout_password" />
 
-                <!-- Divider with refined styling -->
-                <LinearLayout
-                    android:id="@+id/layout_divider"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
-                    android:fontFamily="@font/product_sans"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/button_create_account">
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="0.5"
-                        android:background="@color/apple_divider" />
-
-                    <TextView
-                        android:id="@+id/text_divider"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/product_sans"
-                        android:letterSpacing="0.05"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="20dp"
-                        android:text="OR SIGN UP WITH"
-                        android:textColor="@color/apple_text_secondary"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="0.5"
-                        android:background="@color/apple_divider" />
-                </LinearLayout>
-
-                <!-- Social Login Buttons with enhanced Apple design -->
-                <LinearLayout
-                    android:id="@+id/layout_social"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="28dp"
-                    android:orientation="horizontal"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layout_divider">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/button_google"
-                        style="@style/Widget.Material3.Button.Icon"
-                        android:layout_width="0dp"
-                        android:layout_height="52dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_weight="1"
-                        android:elevation="4dp"
-                        app:backgroundTint="@color/apple_social_background"
-                        app:cornerRadius="16dp"
-                        app:icon="@drawable/google_icon"
-                        app:iconGravity="textStart"
-                        app:iconPadding="0dp"
-                        app:iconTint="@null" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/button_microsoft"
-                        style="@style/Widget.Material3.Button.Icon"
-                        android:layout_width="0dp"
-                        android:layout_height="52dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_weight="1"
-                        android:elevation="4dp"
-                        app:backgroundTint="@color/apple_social_background"
-                        app:cornerRadius="16dp"
-                        app:icon="@drawable/microsoft_icon"
-                        app:iconGravity="textStart"
-                        app:iconPadding="0dp"
-                        app:iconTint="@null" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/button_apple"
-                        style="@style/Widget.Material3.Button.Icon"
-                        android:layout_width="0dp"
-                        android:layout_height="52dp"
-                        android:layout_weight="1"
-                        android:elevation="4dp"
-                        app:backgroundTint="@color/apple_social_background"
-                        app:cornerRadius="16dp"
-                        app:icon="@drawable/apple_icon"
-                        app:iconGravity="textStart"
-                        app:iconPadding="0dp"
-                        app:iconTint="@color/apple_text_primary" />
-
-                </LinearLayout>
 
                 <!-- Terms Text with refined styling -->
                 <TextView
@@ -359,7 +286,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/layout_social" />
+                    app:layout_constraintTop_toBottomOf="@id/button_create_account" />
 
                 <ProgressBar
                     android:id="@+id/progress_bar"

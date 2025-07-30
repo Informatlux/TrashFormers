@@ -47,7 +47,7 @@
         android:id="@+id/history_item_arrow"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:src="@drawable/chevron_right_arrow"
+        android:src="@drawable/right_icon"
         app:tint="@color/ai_text_secondary" />
 
 </LinearLayout>

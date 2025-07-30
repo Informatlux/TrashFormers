@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
     id("kotlin-parcelize")
+    kotlin("plugin.serialization") version "1.9.0"
 }
 
 android {
@@ -58,8 +59,22 @@ dependencies {
     implementation("com.google.android.material:material:1.14.0-alpha03") // stable Material Components
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("com.google.android.gms:play-services-maps:19.2.0")
-    implementation("com.google.ai.edge.aicore:aicore:0.0.1-exp02")
-    implementation("com.google.guava:guava:31.1-jre")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
+
+    // Database Libraries
+    implementation(platform("io.github.jan-tennert.supabase:bom:2.6.1"))
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.6.1")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.6.1")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.6.1")
+    implementation("io.github.jan-tennert.supabase:storage-kt:2.6.1")
+    implementation("io.ktor:ktor-client-android:2.3.7")
+    implementation("io.ktor:ktor-client-core:2.3.7")
+    implementation("io.ktor:ktor-client-json:2.3.7")
+    implementation("io.ktor:ktor-client-logging:2.3.7")
+    implementation("io.ktor:ktor-client-serialization:2.3.7")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
 
     // Lifecycle libraries
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.2")
@@ -69,40 +84,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
     // ML Kit (exclude litert libraries to avoid duplicate TensorFlow Lite API classes)
-    implementation("com.google.mlkit:genai-image-description:1.0.0-beta1") {
-        exclude(group = "com.google.ai.edge.litert", module = "litert-api")
-        exclude(group = "com.google.ai.edge.litert", module = "litert-support-api")
-    }
-    implementation("com.google.mlkit:image-labeling:17.0.9") {
-        exclude(group = "com.google.ai.edge.litert", module = "litert-api")
-        exclude(group = "com.google.ai.edge.litert", module = "litert-support-api")
-    }
-    implementation("com.google.mlkit:object-detection:17.0.2") {
-        exclude(group = "com.google.ai.edge.litert", module = "litert-api")
-        exclude(group = "com.google.ai.edge.litert", module = "litert-support-api")
-    }
-    implementation("com.google.mlkit:smart-reply:17.0.4") {
-        exclude(group = "com.google.ai.edge.litert", module = "litert-api")
-        exclude(group = "com.google.ai.edge.litert", module = "litert-support-api")
-    }
-
-    // TensorFlow Lite core and task libraries, keep these only once and consistent versions
-    implementation("org.tensorflow:tensorflow-lite:2.17.0") {
-        exclude(group = "com.google.ai.edge.litert", module = "litert-api")
-        exclude(group = "com.google.ai.edge.litert", module = "litert-support-api")
-    }
-    implementation("org.tensorflow:tensorflow-lite-support:0.5.0"){
-        exclude(group = "com.google.ai.edge.litert", module = "litert-api")
-        exclude(group = "com.google.ai.edge.litert", module = "litert-support-api")
-    }
-    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4"){
-        exclude(group = "com.google.ai.edge.litert", module = "litert-api")
-        exclude(group = "com.google.ai.edge.litert", module = "litert-support-api")
-    }
-    implementation("org.tensorflow:tensorflow-lite-gpu-delegate-plugin:0.4.4"){
-        exclude(group = "com.google.ai.edge.litert", module = "litert-api")
-        exclude(group = "com.google.ai.edge.litert", module = "litert-support-api")
-    }
 
     // Google Play Services
     implementation("com.google.android.gms:play-services-auth:21.4.0")

@@ -71,13 +71,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             insets
         }
 
-        findViewById<Button>(R.id.btn_logout).setOnClickListener {
-            logoutUser()
-        }
 
         // Setup UI and other initialization
         setupUIAndClickListeners()
         setupEntryAnimations()
+        displayUserFullName()
         updateGreeting()
         requestPermissions()
         updateEcoPointsDisplay()
@@ -86,8 +84,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private fun setupUIAndClickListeners() {
         // Your other click listeners
-        findViewById<ShapeableImageView>(R.id.profile_image).setOnClickListener { showToast("Profile clicked") }
-        findViewById<ImageView>(R.id.notification_button).setOnClickListener { showToast("Notifications clicked") }
+        findViewById<ShapeableImageView>(R.id.profile_image).setOnClickListener { }
 
         // --- Cards ---
         findViewById<MaterialCardView>(R.id.total_points_card).setOnClickListener { showEcoScoreDetails() }
@@ -105,8 +102,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         // --- "See More" Links ---
         findViewById<TextView>(R.id.see_more_challenges).setOnClickListener { showAllChallenges() }
         findViewById<TextView>(R.id.see_more_activity).setOnClickListener { showAllActivity() }
-        findViewById<ShapeableImageView>(R.id.profile_image).setOnClickListener { showToast("Profile clicked") }
-        findViewById<ImageView>(R.id.notification_button).setOnClickListener { showToast("Notifications clicked") }
+        findViewById<ShapeableImageView>(R.id.profile_image).setOnClickListener {}
 
         // Cards etc.
 
@@ -115,7 +111,6 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    showToast("Home selected")
                     true
                 }
                 R.id.nav_maps -> {
@@ -158,19 +153,21 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun logoutUser() {
-        // Clear the saved login state
-        val sharedPreferences = getSharedPreferences(LoginActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        with(sharedPreferences.edit()) {
-            putBoolean(LoginActivity.KEY_IS_LOGGED_IN, false)
-            apply()
+    private fun displayUserFullName() {
+        val prefs = getSharedPreferences(LoginActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        val firstName = prefs.getString("user_first_name", "") ?: ""
+        val lastName = prefs.getString("user_last_name", "") ?: ""
+
+        val fullName = when {
+            firstName.isNotEmpty() && lastName.isNotEmpty() -> "$firstName $lastName"
+            firstName.isNotEmpty() -> firstName
+            lastName.isNotEmpty() -> lastName
+            else -> "User"
         }
 
-        // Navigate back to the LoginActivity
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivity(intent)
-        finish() // Close MainActivity
+        findViewById<TextView>(R.id.user_name_text).text = fullName
     }
+
 
     private fun setupEntryAnimations() {
         try {

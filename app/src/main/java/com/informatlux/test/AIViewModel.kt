@@ -1,52 +1,72 @@
 package com.informatlux.test
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.*
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.gotrue.Auth
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Order
+import kotlinx.coroutines.launch
 
-class AIViewModel : ViewModel() {
+class AIViewModel(application: Application) : AndroidViewModel(application) {
+    private val TAG = "AIViewModel"
 
-    // LiveData for the carousel items
-    private val _carouselItems = MutableLiveData<List<AiCarouselItem>>()
-    val carouselItems: LiveData<List<AiCarouselItem>> = _carouselItems
+    private val _chatSessions = MutableLiveData<List<ChatSession>>(emptyList())
+    val chatSessions: LiveData<List<ChatSession>> = _chatSessions
 
-    // LiveData for the history items
-    private val _historyItems = MutableLiveData<List<AiHistoryItem>>()
-    val historyItems: LiveData<List<AiHistoryItem>> = _historyItems
-
-    // LiveData to control the visibility of the "No history" text
-    private val _isHistoryEmpty = MutableLiveData<Boolean>()
-    val isHistoryEmpty: LiveData<Boolean> = _isHistoryEmpty
+    private lateinit var supabase: SupabaseClient
+    private val userId = "user1" // Replace with actual user ID
 
     init {
-        loadAiFeatures()
-        loadChatHistory()
+        Log.d(TAG, "Initializing AIViewModel")
+        initializeSupabase()
+        loadChatSessions()
     }
 
-    private fun loadAiFeatures() {
-        // In a real app, this data would come from a remote config or a database
-        val features = listOf(
-            AiCarouselItem(R.drawable.help_icon, "AI Helper", "General AI assistant for eco tips and questions.") ,
-            AiCarouselItem(R.drawable.scan_icon, "Scan Images", "Capture images to classify waste automatically."),
-            AiCarouselItem(R.drawable.waste_separation_icon, "Classify Waste Items", "AI-powered classification for better sorting."),
-            AiCarouselItem(R.drawable.voice_mode_icon, "Voice Mode", "Interact with the AI assistant using voice commands."),
-            AiCarouselItem(R.drawable.decompostion_time, "Decomposition Time", "Estimate how long waste takes to decompose."),
-            AiCarouselItem(R.drawable.recycle_icon, "Smart Recycling Suggestions", "Recommendation of recycling centers and methods."),
-            AiCarouselItem(R.drawable.trash_icon, "Waste Sorting Assistance", "Help sorting waste into correct bins."),
-            AiCarouselItem(R.drawable.electronics_icon, "E-Waste Identification", "Recognize electronic waste & safe disposal tips."),
-            AiCarouselItem(R.drawable.eco_points_icon, "Eco Points & Gamification", "Earn points and rewards for eco-friendly actions."),
-            AiCarouselItem(R.drawable.info_icon, "AI Help & FAQs", "Chat with AI assistant for instant help.")
-
-        )
-        _carouselItems.value = features
+    private fun initializeSupabase() {
+        Log.d(TAG, "Initializing Supabase client for AIViewModel")
+        try {
+            supabase = createSupabaseClient(
+                supabaseUrl = "https://jedpwwxjrsejumyqyrgx.supabase.co",
+                supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImplZHB3d3hqcnNlanVteXF5cmd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4NzYzMzQsImV4cCI6MjA2OTQ1MjMzNH0.x9iFEmjd8ldd_llmc70ZfVqV3BBsUx1MSLnZbFCPlxI"
+            ) {
+                install(Auth)
+                install(Postgrest) {
+                    defaultSchema = "api" // CHANGED FROM "public" TO "api"
+                }
+            }
+            Log.d(TAG, "Supabase client initialized successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize Supabase client", e)
+        }
     }
 
-    private fun loadChatHistory() {
-        // In a real app, you would fetch this from a local database (like Room)
-        val history = listOf(
-            AiHistoryItem(R.drawable.ai_chatbot, "Code tutor", "How to use Visual Studio", R.drawable.ai_history_bg),
-        )
-        _historyItems.value = history
-        _isHistoryEmpty.value = history.isEmpty()
+    private fun loadChatSessions() {
+        Log.d(TAG, "Loading chat sessions for user: $userId")
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Fetching chat sessions from Supabase...")
+                val response = supabase.postgrest["chat_sessions"]
+                    .select(columns = Columns.list("*")) {
+                        filter {
+                            eq("user_id", userId)
+                        }
+                        order("created_at", order = Order.DESCENDING)
+                    }
+
+                val sessions = response.decodeList<ChatSession>()
+                Log.d(TAG, "Loaded ${sessions.size} chat sessions from Supabase")
+
+                _chatSessions.value = sessions
+                Log.d(TAG, "Chat sessions updated in LiveData")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load chat sessions from Supabase", e)
+                _chatSessions.value = emptyList()
+            }
+        }
     }
 }

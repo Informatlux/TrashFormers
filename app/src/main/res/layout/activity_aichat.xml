@@ -117,22 +117,10 @@
             android:scaleType="centerInside"
             android:src="@drawable/mic_icon"
             app:layout_constraintBottom_toBottomOf="@id/edit_text_message"
-            app:layout_constraintEnd_toStartOf="@id/btn_voice_mode"
-            app:layout_constraintTop_toTopOf="@id/edit_text_message"
-            app:tint="@color/chat_icon_tint" />
-
-        <ImageButton
-            android:id="@+id/btn_voice_mode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="5dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/voice_mode_icon"
-            app:layout_constraintBottom_toBottomOf="@id/edit_text_message"
             app:layout_constraintEnd_toStartOf="@id/btn_attach"
             app:layout_constraintTop_toTopOf="@id/edit_text_message"
             app:tint="@color/chat_icon_tint" />
+
 
         <ImageButton
             android:id="@+id/btn_attach"

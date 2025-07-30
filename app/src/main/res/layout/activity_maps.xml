@@ -362,6 +362,7 @@
         android:layout_height="80dp"
         android:layout_gravity="bottom"
         android:background="@drawable/bottom_nav_background"
+        android:elevation="8dp"
         app:itemIconSize="20dp"
         app:itemIconTint="@color/bottom_nav_color_selector"
         app:itemTextColor="@color/bottom_nav_color_selector"

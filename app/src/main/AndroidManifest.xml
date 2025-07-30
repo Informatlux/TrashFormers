@@ -10,17 +10,24 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
+
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 
     <application
         android:name=".TrashFormersApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/trashformers_logo"
         android:label="TrashFormers"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/trashformers_logo"
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.Test">
 
@@ -41,8 +48,8 @@
         <activity android:name=".CreateEventActivity" android:exported="false" />
         <activity android:name=".EventsActivity" android:exported="false" />
         <activity android:name=".SettingsActivity" android:exported="false" />
-        <activity android:name=".AIActivity" android:exported="false" />
         <activity android:name=".AIChatActivity" android:exported="false" />
+        <activity android:name=".AIActivity" android:exported="false" />
         <activity android:name=".ArticleActivity" android:exported="false" />
         <activity
             android:name=".MapsActivity"

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.content.Intent
 import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
@@ -33,6 +34,7 @@ class ArticleActivity : AppCompatActivity() {
         }
 
         setupClickListeners()
+        displayUserFullName()
         setupEntryAnimations()
         updateEcoPointsDisplay()
     }
@@ -40,12 +42,8 @@ class ArticleActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         // --- Header ---
-        findViewById<com.google.android.material.imageview.ShapeableImageView>(R.id.profile_image).setOnClickListener {
-            showToast("Profile clicked")
-        }
-        findViewById<android.widget.ImageView>(R.id.notification_button).setOnClickListener {
-            showToast("Notifications clicked")
-        }
+        findViewById<com.google.android.material.imageview.ShapeableImageView>(R.id.profile_image).setOnClickListener {}
+
 
         // ... Add listeners for all cards and "See More" buttons as needed ...
 
@@ -108,6 +106,21 @@ class ArticleActivity : AppCompatActivity() {
             }
             animator.start()
         }
+    }
+
+    private fun displayUserFullName() {
+        val prefs = getSharedPreferences(LoginActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        val firstName = prefs.getString("user_first_name", "") ?: ""
+        val lastName = prefs.getString("user_last_name", "") ?: ""
+
+        val fullName = when {
+            firstName.isNotEmpty() && lastName.isNotEmpty() -> "$firstName $lastName"
+            firstName.isNotEmpty() -> firstName
+            lastName.isNotEmpty() -> lastName
+            else -> "User"
+        }
+
+        findViewById<TextView>(R.id.user_name_text).text = fullName
     }
 
     private fun showToast(message: String) {
