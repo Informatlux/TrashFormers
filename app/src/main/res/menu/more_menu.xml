@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Group 1: Profile Settings -->
+    <group android:id="@+id/group_profile" android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_profile_settings"
+            android:title="Settings"
+            android:icon="@drawable/settings_icon"
+            android:orderInCategory="1" />
+
+        <item
+            android:id="@+id/nav_profile"
+            android:title="Profile"
+            android:icon="@drawable/profile_icon"
+            android:orderInCategory="2" />
+
+        <item
+            android:id="@+id/nav_profile_events"
+            android:title="Events"
+            android:icon="@drawable/events_icon"
+            android:orderInCategory="3" />
+
+        <item
+            android:id="@+id/nav_profile_leaderboard"
+            android:title="Leaderboard"
+            android:icon="@drawable/leaderboard_icon"
+            android:orderInCategory="4" />
+
+        <item
+            android:id="@+id/nav_profile_tools"
+            android:title="Tools"
+            android:icon="@drawable/tools_icon"
+            android:orderInCategory="5" />
+    </group>
+
+    <!-- Group 2: Help & About -->
+    <group android:id="@+id/group_help" android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_profile_help"
+            android:title="Help"
+            android:icon="@drawable/help_icon"
+            android:orderInCategory="6" />
+
+        <item
+            android:id="@+id/nav_profile_about"
+            android:title="About"
+            android:icon="@drawable/info_icon"
+            android:orderInCategory="7" />
+    </group>
+
+    <!-- Logout item standalone -->
+    <item
+        android:id="@+id/nav_profile_logout"
+        android:title="Logout"
+        android:icon="@drawable/logout_icon"
+        android:orderInCategory="8" />
+
+</menu>

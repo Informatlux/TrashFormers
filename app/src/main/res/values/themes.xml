@@ -83,6 +83,11 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
+    <style name="ShapeAppearance.App.ChatImagePreview" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
     <style name="ShapeAppearance.App.Card.Top" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSizeTopLeft">20dp</item>

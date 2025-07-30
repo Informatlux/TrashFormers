@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "116687219478",
+    "project_id": "trashformers-5be30",
+    "storage_bucket": "trashformers-5be30.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:116687219478:android:d47d097ef869dcc6dbbe37",
+        "android_client_info": {
+          "package_name": "com.informatlux.test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "116687219478-hr2hnu8n5j8031eb7k3k21ht3tve2i87.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.informatlux.test",
+            "certificate_hash": "6fdb4db05c80769c18c966c4de98288ebc95096f"
+          }
+        },
+        {
+          "client_id": "116687219478-9tat1fq0n6t14h7nm02uqkbdj220pi7v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDndMVnZW9sGkEIjt3uZM91QIH8WlJlNk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "116687219478-9tat1fq0n6t14h7nm02uqkbdj220pi7v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

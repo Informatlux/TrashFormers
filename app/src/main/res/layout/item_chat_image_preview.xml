@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This layout is aligned to the right, just like a user's text message -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <!-- The ShapeableImageView is the best component for displaying images with rounded corners -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/image_preview"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.7"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.ChatImagePreview"
+        tools:src="@tools:sample/backgrounds/scenic" />
+
+    <!-- A progress bar to show while the image is being analyzed by the AI -->
+    <ProgressBar
+        android:id="@+id/image_upload_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="@color/white"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/image_preview"
+        app:layout_constraintEnd_toEndOf="@id/image_preview"
+        app:layout_constraintStart_toStartOf="@id/image_preview"
+        app:layout_constraintTop_toTopOf="@id/image_preview"
+        tools:visibility="visible" />
+
+    <!-- A button to allow the user to cancel the image selection -->
+    <ImageButton
+        android:id="@+id/btn_remove_image"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:contentDescription="Remove image"
+        android:src="@drawable/close_icon"
+        app:layout_constraintStart_toStartOf="@id/image_preview"
+        app:layout_constraintTop_toTopOf="@id/image_preview"
+        app:tint="@color/black" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

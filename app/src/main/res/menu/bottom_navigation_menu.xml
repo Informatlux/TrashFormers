@@ -12,9 +12,9 @@
         android:title="Maps" />
 
     <item
-        android:id="@+id/nav_scan"
-        android:icon="@drawable/scan_icon"
-        android:title="Scan" />
+        android:id="@+id/nav_ai"
+        android:icon="@drawable/ai_chatbot"
+        android:title="AI" />
 
     <item
         android:id="@+id/nav_article"
@@ -22,7 +22,7 @@
         android:title="Articles" />
 
     <item
-        android:id="@+id/nav_profile"
+        android:id="@+id/nav_more"
         android:icon="@drawable/more_icon"
         android:title="More" />
 

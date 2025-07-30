@@ -1,0 +1,67 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="48dp"
+            android:height="12dp"
+            android:viewportWidth="48"
+            android:viewportHeight="12">
+            <group>
+                <path
+                    android:name="dot1"
+                    android:fillColor="#8A8A8E"
+                    android:pathData="M 6 6 a 4 4 0 0 1 0 -0.0001" />
+                <path
+                    android:name="dot2"
+                    android:fillColor="#8A8A8E"
+                    android:pathData="M 24 6 a 4 4 0 0 1 0 -0.0001" />
+                <path
+                    android:name="dot3"
+                    android:fillColor="#8A8A8E"
+                    android:pathData="M 42 6 a 4 4 0 0 1 0 -0.0001" />
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="dot1">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="600"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+                android:propertyName="pathData"
+                android:repeatCount="infinite"
+                android:repeatMode="reverse"
+                android:valueFrom="M 6 6 a 4 4 0 0 1 0 -0.0001"
+                android:valueTo="M 6 2 a 4 4 0 0 1 0 -0.0001"
+                android:valueType="pathType" />
+        </aapt:attr>
+    </target>
+    <target android:name="dot2">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="600"
+                android:startOffset="150"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+                android:propertyName="pathData"
+                android:repeatCount="infinite"
+                android:repeatMode="reverse"
+                android:valueFrom="M 24 6 a 4 4 0 0 1 0 -0.0001"
+                android:valueTo="M 24 2 a 4 4 0 0 1 0 -0.0001"
+                android:valueType="pathType" />
+        </aapt:attr>
+    </target>
+    <target android:name="dot3">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="600"
+                android:startOffset="300"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+                android:propertyName="pathData"
+                android:repeatCount="infinite"
+                android:repeatMode="reverse"
+                android:valueFrom="M 42 6 a 4 4 0 0 1 0 -0.0001"
+                android:valueTo="M 42 2 a 4 4 0 0 1 0 -0.0001"
+                android:valueType="pathType" />
+        </aapt:attr>
+    </target>
+</animated-vector>

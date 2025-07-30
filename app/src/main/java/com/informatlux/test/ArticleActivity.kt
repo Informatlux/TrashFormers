@@ -6,6 +6,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.view.animation.DecelerateInterpolator
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,8 +14,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
+import com.informatlux.test.ScoreManager
 
 class ArticleActivity : AppCompatActivity() {
+
+    private val userId = "user1" // Replace with actual user ID logic
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +34,9 @@ class ArticleActivity : AppCompatActivity() {
 
         setupClickListeners()
         setupEntryAnimations()
+        updateEcoPointsDisplay()
     }
+
 
     private fun setupClickListeners() {
         // --- Header ---
@@ -50,20 +56,29 @@ class ArticleActivity : AppCompatActivity() {
                 R.id.nav_home -> {
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
-                    true }
+                    true
+                }
                 R.id.nav_maps -> {
                     startActivity(Intent(this, MapsActivity::class.java))
                     finish()
-                    true }
-                R.id.nav_scan -> { showToast("Scan selected"); true }
+                    true
+                }
+                R.id.nav_ai -> {
+                    startActivity(Intent(this, AIActivity::class.java))
+                    finish()
+                    true
+                }
                 R.id.nav_article -> {
-                    showToast("Home selected")
-                    true }
-                R.id.nav_profile -> { showToast("Profile selected"); true }
+                    true
+                }
+                R.id.nav_more -> {
+                    startActivity(Intent(this, MoreActivity::class.java))
+                    finish()
+                    true
+                }
                 else -> false
             }
         }
-        // Set the correct item as selected from the start
         bottomNav.selectedItemId = R.id.nav_article
     }
 
@@ -97,5 +112,15 @@ class ArticleActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    // Example: When user reads an article
+    private fun onArticleRead() {
+        ScoreManager.addPoints(userId, ScoreManager.POINTS_ARTICLE_READ)
+        updateEcoPointsDisplay()
+    }
+    private fun updateEcoPointsDisplay() {
+        val points = ScoreManager.getScore(userId)
+        findViewById<TextView>(R.id.total_points_text).text = points.toString()
     }
 }

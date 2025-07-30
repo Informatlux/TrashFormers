@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Root ConstraintLayout named "main" for WindowInsets padding -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,9 +7,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/ai_background"
-    tools:context=".MainActivity">
+    tools:context=".AIActivity">
 
-    <androidx.core.widget.NestedScrollView
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:overScrollMode="never"
@@ -20,23 +21,39 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Top Header (empty in your original, keep or add content as needed) -->
+            <!-- Top Header -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp" />
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp">
 
-            <!-- Title -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:fontFamily="@font/product_sans_bold"
-                android:letterSpacing="-0.02"
-                android:lineSpacingExtra="8sp"
-                android:text="Create, explore,\nbe inspired"
-                android:textColor="@color/ai_text_primary"
-                android:textSize="34sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:fontFamily="@font/product_sans_bold"
+                    android:letterSpacing="-0.02"
+                    android:lineSpacingExtra="8sp"
+                    android:text="AI Space"
+                    android:textColor="@color/ai_text_primary"
+                    android:textSize="34sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_new_chat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/ai_text_primary"
+                    android:fontFamily="@font/product_sans_bold"
+                    android:paddingHorizontal="20dp"
+                    android:text="New Chat"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    app:cornerRadius="24dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Search Bar -->
             <com.google.android.material.textfield.TextInputLayout
@@ -63,18 +80,23 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- AI Feature Carousel -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/carousel_recycler_view"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/root"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginBottom="32dp"
-                android:clipToPadding="false"
-                android:scrollbars="horizontal"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_carousel_card" />
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/carousel_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:scrollbars="none"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- History Section Header -->
             <RelativeLayout
@@ -104,19 +126,31 @@
                     android:textSize="14sp" />
             </RelativeLayout>
 
-            <!-- History List -->
+            <!-- History List RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/history_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="4"
                 tools:listitem="@layout/chat_history" />
 
+            <!-- No History Text (initially hidden) -->
+            <TextView
+                android:id="@+id/empty_history_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="24dp"
+                android:text="No previous chats found."
+                android:textColor="@color/ai_text_secondary"
+                android:textSize="16sp"
+                android:textAlignment="center"
+                android:fontFamily="@font/product_sans"
+                android:visibility="gone" />
+
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </ScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
@@ -132,6 +166,5 @@
         app:itemTextColor="@color/bottom_nav_color_selector"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_navigation_menu" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

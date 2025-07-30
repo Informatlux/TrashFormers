@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        app:title="Profile"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            app:key="key_edit_profile"
+            app:title="Edit Profile"
+            app:summary="Manage your name, avatar, and public information"
+            app:icon="@drawable/profile_placeholder_icon" />
+
+        <Preference
+            app:key="key_account_status"
+            app:title="Account Status"
+            app:summary="Current Plan: Free"
+            app:icon="@drawable/profile_icon" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="Notifications"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            app:key="key_notifications_enable"
+            app:title="Enable Notifications"
+            app:summary="Receive updates and alerts"
+            app:defaultValue="true"
+            app:icon="@drawable/notifications_bell_icon" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="Appearance"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            app:key="key_theme"
+            app:title="Theme"
+            app:summary="%s"
+            app:defaultValue="system"
+            app:entries="@array/theme_entries"
+            app:entryValues="@array/theme_values"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="Data and Privacy"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            app:key="key_clear_cache"
+            app:title="Clear Cache"
+            app:summary="Clear temporary data to free up space" />
+
+        <Preference
+            app:key="key_privacy_policy"
+            app:title="Privacy Policy" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="About"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            app:key="key_rate_us"
+            app:title="Rate Us on the Play Store"
+            app:icon="@drawable/eco_points_icon" />
+
+        <Preference
+            app:key="key_app_version"
+            app:title="App Version"
+            app:summary="1.0.0 (Build 1)"
+            app:icon="@drawable/info_icon" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

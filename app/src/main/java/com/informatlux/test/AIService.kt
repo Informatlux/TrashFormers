@@ -1,235 +1,222 @@
-
 package com.informatlux.test
 
-import android.content.Context
 import android.util.Log
-import kotlinx.coroutines.*
-import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
+import com.google.gson.Gson
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.random.Random
 
-class AIService(private val context: Context) {
+class AIService {
 
     companion object {
         private const val TAG = "AIService"
-        private const val HUGGING_FACE_API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium"
-        // In production, store this securely
-        private const val API_KEY = "hf_your_api_key_here" // Replace with actual key
-    }
+        private const val API_KEY = "Bearer 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"
 
-    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        // Use local mode by default until API is fixed or implemented
+        private var useLocalMode = true
 
-    suspend fun classifyWaste(description: String): String = withContext(Dispatchers.IO) {
-        try {
-            val wasteClassificationPrompt = """
-                Classify this waste item and provide recycling instructions: "$description"
-                
-                Provide classification in this format:
-                Category: [Recyclable/Compostable/Hazardous/General Waste]
-                Instructions: [Specific disposal instructions]
-                Environmental Impact: [Brief impact statement]
-                EcoPoints: [Points earned: 10-50]
-            """.trimIndent()
+        private val client = OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .build()
 
-            return@withContext queryAI(wasteClassificationPrompt) ?: getOfflineClassification(description)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error classifying waste", e)
-            return@withContext getOfflineClassification(description)
-        }
-    }
+        private val gson = Gson()
 
-    suspend fun getEcoTip(): String = withContext(Dispatchers.IO) {
-        try {
-            val tipPrompt = """
-                Generate a daily environmental tip about waste reduction, recycling, or sustainability.
-                Include actionable steps and environmental impact.
-                Format as: 
-                Tip: [Main tip]
-                Action: [What to do]
-                Impact: [Environmental benefit]
-            """.trimIndent()
-
-            return@withContext queryAI(tipPrompt) ?: getOfflineEcoTip()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting eco tip", e)
-            return@withContext getOfflineEcoTip()
-        }
-    }
-
-    suspend fun chatWithEcoBot(userMessage: String, conversationHistory: List<String> = emptyList()): String = withContext(Dispatchers.IO) {
-        try {
-            val contextualPrompt = buildString {
-                append("You are EcoBot, an AI assistant specializing in environmental sustainability, waste management, and eco-friendly practices. ")
-                append("Provide helpful, accurate advice about recycling, composting, waste reduction, and environmental conservation.\n\n")
-
-                if (conversationHistory.isNotEmpty()) {
-                    append("Previous conversation:\n")
-                    conversationHistory.takeLast(4).forEach { append("$it\n") }
-                    append("\n")
-                }
-
-                append("User: $userMessage\nEcoBot:")
-            }
-
-            return@withContext queryAI(contextualPrompt) ?: getOfflineEcoBotResponse(userMessage)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error in EcoBot chat", e)
-            return@withContext getOfflineEcoBotResponse(userMessage)
-        }
-    }
-
-    suspend fun analyzeFootprint(wasteData: Map<String, Double>): String = withContext(Dispatchers.IO) {
-        try {
-            val analysisPrompt = """
-                Analyze this weekly waste footprint data and provide insights:
-                ${wasteData.entries.joinToString("\n") { "${it.key}: ${it.value} kg" }}
-                
-                Provide analysis in this format:
-                Summary: [Overall assessment]
-                Improvements: [Specific recommendations]
-                Goals: [Suggested targets for next week]
-                Environmental Impact: [CO2 savings potential]
-            """.trimIndent()
-
-            return@withContext queryAI(analysisPrompt) ?: getOfflineFootprintAnalysis(wasteData)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error analyzing footprint", e)
-            return@withContext getOfflineFootprintAnalysis(wasteData)
-        }
-    }
-
-    private suspend fun queryAI(prompt: String): String? = withContext(Dispatchers.IO) {
-        try {
-            val url = URL(HUGGING_FACE_API_URL)
-            val connection = url.openConnection() as HttpURLConnection
-
-            connection.requestMethod = "POST"
-            connection.setRequestProperty("Authorization", "Bearer $API_KEY")
-            connection.setRequestProperty("Content-Type", "application/json")
-            connection.doOutput = true
-
-            val requestBody = JSONObject().apply {
-                put("inputs", prompt)
-                put("parameters", JSONObject().apply {
-                    put("max_length", 200)
-                    put("temperature", 0.7)
-                    put("do_sample", true)
-                })
-            }
-
-            connection.outputStream.use { os ->
-                os.write(requestBody.toString().toByteArray())
-            }
-
-            val responseCode = connection.responseCode
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                val response = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
-                val jsonResponse = JSONObject(response)
-
-                // Parse response based on API structure
-                return@withContext when {
-                    jsonResponse.has("generated_text") -> jsonResponse.getString("generated_text")
-                    jsonResponse.has("choices") -> jsonResponse.getJSONArray("choices").getJSONObject(0).getString("text")
-                    else -> null
-                }
-            } else {
-                Log.e(TAG, "API request failed with code: $responseCode")
-                return@withContext null
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error querying AI API", e)
-            return@withContext null
-        }
-    }
-
-    // Fallback methods for offline/error scenarios
-    private fun getOfflineClassification(description: String): String {
-        return when {
-            description.contains("bottle", ignoreCase = true) -> """
-                Category: Recyclable
-                Instructions: Clean the bottle, remove cap and label if possible, place in recycling bin
-                Environmental Impact: Recycling saves 60% energy compared to producing new plastic
-                EcoPoints: 25
-            """.trimIndent()
-
-            description.contains("food", ignoreCase = true) || description.contains("organic", ignoreCase = true) -> """
-                Category: Compostable
-                Instructions: Add to compost bin or organic waste collection
-                Environmental Impact: Composting reduces methane emissions from landfills by 50%
-                EcoPoints: 20
-            """.trimIndent()
-
-            description.contains("battery", ignoreCase = true) || description.contains("electronic", ignoreCase = true) -> """
-                Category: Hazardous
-                Instructions: Take to designated e-waste collection center or electronics store
-                Environmental Impact: Proper disposal prevents toxic materials from contaminating soil
-                EcoPoints: 50
-            """.trimIndent()
-
-            else -> """
-                Category: General Waste
-                Instructions: Check local recycling guidelines for specific disposal methods
-                Environmental Impact: Proper sorting helps improve recycling efficiency
-                EcoPoints: 10
-            """.trimIndent()
-        }
-    }
-
-    private fun getOfflineEcoTip(): String {
-        val tips = listOf(
-            """
-            Tip: Use a reusable water bottle instead of buying plastic bottles
-            Action: Invest in a good quality reusable bottle and carry it everywhere
-            Impact: Can save up to 1,460 plastic bottles per year
-            """.trimIndent(),
-
-            """
-            Tip: Start composting your food scraps
-            Action: Set up a small compost bin for fruit peels, vegetable scraps, and coffee grounds
-            Impact: Reduces household waste by 30% and creates nutrient-rich soil
-            """.trimIndent(),
-
-            """
-            Tip: Bring reusable bags when shopping
-            Action: Keep foldable bags in your car, purse, or by your front door
-            Impact: Prevents hundreds of plastic bags from entering the waste stream annually
-            """.trimIndent()
+        // Predefined conversation responses mapped by keyword lists
+        private val conversationResponses = mapOf(
+            listOf("hello", "hi", "hey", "good morning", "good evening") to listOf(
+                "Hello! I'm your AI assistant for waste management and environmental questions. How can I help you today?",
+                "Hi there! I can help you with recycling, waste classification, and environmental tips. What would you like to know?",
+                "Hey! I'm here to assist with all your waste management questions. Fire away!"
+            ),
+            listOf("waste", "trash", "garbage", "rubbish") to listOf(
+                "There are several types of waste: recyclable (plastic, paper, glass, metal), organic (food scraps), hazardous (batteries, chemicals), and general waste. Which type are you asking about?",
+                "Proper waste management involves sorting into categories: recyclables, compostables, hazardous materials, and landfill waste. What specific waste do you need help with?",
+                "Waste can be managed better by following the 3 R's: Reduce, Reuse, Recycle. What aspect would you like to explore?"
+            ),
+            listOf("recycle", "recycling", "recyclable") to listOf(
+                "Great question about recycling! Most plastic bottles, aluminum cans, paper, and cardboard can be recycled. Check the recycling symbols and local guidelines.",
+                "Recycling helps reduce environmental impact. Clean containers, separate materials by type, and check your local recycling center's guidelines.",
+                "The key to effective recycling is proper sorting: plastics (#1-7), paper products, metals, and glass. Always clean containers first!"
+            ),
+            listOf("plastic", "bottle", "container") to listOf(
+                "Plastic recycling depends on the type! Look for numbers 1-7 in the recycling symbol. PET (#1) and HDPE (#2) are most commonly recycled.",
+                "Plastic containers should be emptied, rinsed, and sorted by type. Remove caps and labels when possible for better recycling.",
+                "Not all plastics are recyclable. Check with your local facility, but generally avoid #3, #6, and #7 plastics in curbside recycling."
+            ),
+            listOf("paper", "cardboard", "newspaper") to listOf(
+                "Paper products are highly recyclable! Remove staples, plastic tape, and flatten cardboard boxes. Avoid wet or greasy paper.",
+                "Most paper can be recycled 5-7 times before the fibers become too short. Keep it dry and separate from other materials.",
+                "Cardboard recycling tip: Break down boxes and remove any plastic tape or labels for the best recycling results."
+            ),
+            listOf("metal", "aluminum", "can", "tin") to listOf(
+                "Metal is infinitely recyclable! Aluminum cans, steel cans, and foil can all be recycled. Rinse them clean first.",
+                "Aluminum recycling saves 95% of the energy needed to make new aluminum. It's one of the most valuable recyclables!",
+                "Metal containers should be empty and rinsed. You can leave labels on - they'll be removed during processing."
+            ),
+            listOf("glass", "jar", "bottle") to listOf(
+                "Glass is 100% recyclable and can be recycled endlessly! Separate by color if your area requires it.",
+                "Remove caps and lids from glass containers. Most recycling programs accept clear, brown, and green glass.",
+                "Glass recycling tip: Don't include broken glass, mirrors, or window glass in regular recycling - they have different melting points."
+            ),
+            listOf("electronic", "e-waste", "battery", "phone", "computer") to listOf(
+                "E-waste needs special handling! Take electronics to certified e-waste recycling centers, not regular trash.",
+                "Electronics contain valuable materials like gold, silver, and rare earth elements that can be recovered through proper recycling.",
+                "Many retailers offer e-waste takeback programs. Check with manufacturers or local electronics stores for options."
+            ),
+            listOf("food", "organic", "compost", "kitchen") to listOf(
+                "Food waste can be composted! Fruit peels, vegetable scraps, coffee grounds, and eggshells make great compost.",
+                "Composting reduces methane emissions from landfills and creates nutrient-rich soil. Avoid meat, dairy, and oils in home compost.",
+                "Organic waste comprises about 30% of household waste. Composting is a great way to reduce your environmental impact!"
+            ),
+            listOf("help", "what can you do", "assist") to listOf(
+                "I can help you with:\n• Waste identification and classification\n• Recycling guidelines\n• Environmental tips\n• Composting advice\n• E-waste disposal\n\nWhat specific topic interests you?",
+                "I'm here to assist with waste management questions! I can identify materials, provide recycling tips, and suggest eco-friendly practices.",
+                "My expertise covers waste sorting, recycling processes, environmental impact, and sustainable practices. How can I help you today?"
+            ),
+            listOf("environment", "climate", "sustainability", "green") to listOf(
+                "Great to hear you're thinking about the environment! Proper waste management is crucial for reducing pollution and conserving resources.",
+                "Sustainable practices include reducing consumption, reusing items, recycling properly, and composting organic waste.",
+                "Every small action counts! Proper waste sorting, using reusable items, and supporting circular economy practices make a big difference."
+            )
         )
-        return tips.random()
+
+        private val wasteClassifications = listOf(
+            "plastic bottle", "aluminum can", "cardboard box", "glass jar", "food waste",
+            "paper document", "electronic device", "metal container", "organic matter",
+            "recyclable plastic", "compostable material", "hazardous waste"
+        )
+
+        private val commonObjects = listOf(
+            "plastic bottle", "aluminum can", "paper", "cardboard", "glass container",
+            "food packaging", "metal can", "plastic bag", "newspaper", "magazine",
+            "electronics", "battery", "organic waste", "fabric", "wood"
+        )
+
+        private val imageCaptions = listOf(
+            "I can see various items that appear to be waste or recyclable materials",
+            "This image contains objects that could be sorted for recycling",
+            "I notice several items that might need proper waste classification",
+            "The image shows materials that could benefit from proper sorting",
+            "I can identify objects that may be recyclable or compostable"
+        )
     }
 
-    private fun getOfflineEcoBotResponse(userMessage: String): String {
+    /**
+     * Coroutine suspend function to generate text response.
+     * Currently always uses local mode.
+     */
+    suspend fun generateText(prompt: String): String {
+        Log.d(TAG, "Using local text generation for prompt: $prompt")
+        return generateLocalResponse(prompt)
+    }
+
+    /**
+     * Local simple rule-based response generator
+     */
+    private fun generateLocalResponse(prompt: String): String {
+        val lowerPrompt = prompt.lowercase()
+
+        // Search for matching keyword categories and pick a random response
+        for ((keywords, responses) in conversationResponses) {
+            if (keywords.any { lowerPrompt.contains(it) }) {
+                return responses.random()
+            }
+        }
+
+        // Handle special context-aware cases
         return when {
-            userMessage.contains("plastic", ignoreCase = true) ->
-                "Great question about plastic! Here are key tips: 1) Reduce single-use plastics, 2) Choose reusable alternatives, 3) Recycle clean containers. Look for recycling numbers 1, 2, and 5 - these are most commonly accepted."
-
-            userMessage.contains("compost", ignoreCase = true) ->
-                "Composting is fantastic for the environment! Start with fruit/veggie scraps, coffee grounds, and eggshells. Avoid meat, dairy, and oily foods. Turn your pile weekly and keep it moist but not soggy."
-
-            userMessage.contains("recycle", ignoreCase = true) ->
-                "Recycling tips: 1) Clean containers first, 2) Check local guidelines, 3) When in doubt, throw it out (contamination hurts recycling). Paper, cardboard, glass, and metals are great recycling candidates!"
-
-            else ->
-                "I'm here to help with all your environmental questions! I can assist with waste sorting, recycling guidelines, composting advice, sustainable living tips, and more. What specific topic interests you?"
+            lowerPrompt.contains("how") && lowerPrompt.contains("recycle") -> {
+                "To recycle properly: 1) Clean containers, 2) Sort by material type, 3) Check local guidelines, 4) Use proper bins. What specific item do you want to recycle?"
+            }
+            lowerPrompt.contains("what") && lowerPrompt.contains("type") -> {
+                "I can help identify waste types! Common categories include: recyclables (plastic, paper, metal, glass), organics (food scraps), hazardous (batteries, chemicals), and general waste."
+            }
+            lowerPrompt.contains("where") -> {
+                "For disposal locations, check with your local waste management authority. Most areas have recycling centers, hazardous waste facilities, and compost programs."
+            }
+            lowerPrompt.contains("can i") || lowerPrompt.contains("should i") -> {
+                "That depends on the specific material and your local facilities. Generally, clean recyclables go in recycling bins, organics can be composted, and hazardous items need special handling."
+            }
+            lowerPrompt.length > 50 -> {
+                "That's a detailed question! For comprehensive waste management, focus on the 3 R's: Reduce consumption, Reuse items when possible, and Recycle properly. What specific aspect would you like me to elaborate on?"
+            }
+            else -> {
+                "I'm here to help with waste management and recycling questions! You can ask me about:\n• How to recycle specific items\n• Waste classification\n• Environmental tips\n• Composting guidance\n\nWhat would you like to know?"
+            }
         }
     }
 
-    private fun getOfflineFootprintAnalysis(wasteData: Map<String, Double>): String {
-        val totalWaste = wasteData.values.sum()
-        val recyclableWaste = wasteData.filterKeys { it.contains("plastic", true) || it.contains("paper", true) || it.contains("glass", true) }.values.sum()
-        val recyclingRate = if (totalWaste > 0) (recyclableWaste / totalWaste * 100).toInt() else 0
+    /**
+     * Local image classification simulation (placeholder for future real ML classification).
+     */
+    suspend fun classifyImage(base64Image: String): String {
+        Log.d(TAG, "Using local image classification simulation")
 
-        return """
-            Summary: Generated ${totalWaste.toInt()}kg of waste this week with ${recyclingRate}% recycling rate
-            Improvements: Focus on reducing single-use items and increasing compost separation
-            Goals: Target 20% waste reduction and 80% recycling rate next week
-            Environmental Impact: Potential to save 15kg CO2 equivalent through better sorting
-        """.trimIndent()
+        // Simulate analysis delay
+        delay(1000)
+
+        return wasteClassifications.random()
     }
 
-    fun cleanup() {
-        serviceScope.cancel()
+    /**
+     * Local object detection simulation (placeholder).
+     */
+    suspend fun detectObjects(base64Image: String): List<String> {
+        Log.d(TAG, "Using local object detection simulation")
+
+        delay(1200)
+
+        val numObjects = Random.nextInt(2, 5)
+        return commonObjects.shuffled().take(numObjects)
+    }
+
+    /**
+     * Local image captioning simulation (placeholder).
+     */
+    suspend fun captionImage(base64Image: String): String {
+        Log.d(TAG, "Using local image captioning simulation")
+
+        delay(800)
+
+        return imageCaptions.random()
+    }
+
+    /**
+     * Tests connectivity to remote API (can be used later, currently unused)
+     */
+    suspend fun testAPIConnectivity(): Boolean = suspendCancellableCoroutine { cont ->
+        val requestBody = gson.toJson(mapOf("inputs" to "test"))
+        val request = Request.Builder()
+            .url("https://api-inference.huggingface.co/models/gpt2")
+            .addHeader("Authorization", API_KEY)
+            .post(RequestBody.create("application/json".toMediaTypeOrNull(), requestBody))
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: java.io.IOException) {
+                Log.e(TAG, "API connectivity test failed", e)
+                if (cont.isActive) cont.resume(false)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val success = response.isSuccessful
+                Log.d(TAG, "API connectivity test result: $success (HTTP ${response.code})")
+                if (cont.isActive) cont.resume(success)
+                response.close()
+            }
+        })
+    }
+
+    /**
+     * Enables or disables local mode (for switching to API when implemented)
+     */
+    fun setLocalMode(enabled: Boolean) {
+        useLocalMode = enabled
+        Log.d(TAG, "Local mode is now ${if (enabled) "enabled" else "disabled"}")
     }
 }

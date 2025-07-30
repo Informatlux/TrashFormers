@@ -19,7 +19,7 @@
         android:id="@+id/map_header_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="21dp"
+        android:paddingTop="35dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:orientation="vertical"
@@ -135,7 +135,7 @@
         android:layout_marginBottom="80dp"
         android:padding="16dp"
         app:behavior_hideable="false"
-        app:behavior_peekHeight="300dp"
+        app:behavior_peekHeight="275dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
 
@@ -173,82 +173,106 @@
         </LinearLayout>
 
         <!-- Location Info Header -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="12dp"
-                android:src="@drawable/trash_bin_icon" />
-
+        <!-- Location Info Header -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:layout_marginBottom="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/location_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/product_sans"
-                    android:text="Jalan Taman Daya - 06 Street"
-                    android:textColor="@color/map_text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="12dp"
+                    android:src="@drawable/trash_bin_icon" />
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:gravity="center_vertical">
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/tag_icon"
-                        app:tint="@color/map_text_secondary" />
-
+                    <!-- Main Location Name -->
                     <TextView
-                        android:id="@+id/location_id"
+                        android:id="@+id/location_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
                         android:fontFamily="@font/product_sans"
-                        android:text="FXJD194XC"
-                        android:textColor="@color/map_text_secondary"
-                        android:textSize="12sp" />
+                        android:text="Jalan Taman Daya - 06 Street"
+                        android:textColor="@color/map_text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
-                    <View
-                        android:layout_width="4dp"
-                        android:layout_height="4dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:background="@drawable/dot_separator_icon" />
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/trash_icon"
-                        app:tint="@color/map_text_secondary" />
-
-                    <TextView
-                        android:id="@+id/location_capacity"
+                    <!-- Sub-info line with ID and Capacity -->
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:fontFamily="@font/product_sans"
-                        android:text="47% Capacity"
-                        android:textColor="@color/map_text_secondary"
-                        android:textSize="12sp" />
+                        android:layout_marginTop="4dp"
+                        android:gravity="center_vertical">
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/tag_icon"
+                            app:tint="@color/map_text_secondary" />
+
+                        <TextView
+                            android:id="@+id/location_id"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:fontFamily="@font/product_sans"
+                            android:text="FXJD194XC"
+                            android:textColor="@color/map_text_secondary"
+                            android:textSize="12sp" />
+
+                        <View
+                            android:layout_width="4dp"
+                            android:layout_height="4dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/dot_separator_icon" />
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/trash_icon"
+                            app:tint="@color/map_text_secondary" />
+
+                        <TextView
+                            android:id="@+id/location_capacity"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:fontFamily="@font/product_sans"
+                            android:text="47% Capacity"
+                            android:textColor="@color/map_text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
                 </LinearLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="70dp"
+                    android:layout_height="50dp"
+                    android:background="@color/white"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/location_duration"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:fontFamily="@font/product_sans"
+                        android:textColor="@color/map_primary_green"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="15 min"
+                        android:gravity="center" />
+                </com.google.android.material.card.MaterialCardView>
+
+
+
+
             </LinearLayout>
-        </LinearLayout>
 
         <!-- Action Buttons -->
         <LinearLayout

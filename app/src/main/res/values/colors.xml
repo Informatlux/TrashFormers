@@ -23,6 +23,16 @@
     <color name="text_primary_dark">#1D1D1F</color>
     <color name="text_secondary_grey">#8A8A8E</color>
 
+    <color name="chat_background">#F8F9FA</color>
+    <color name="chat_user_bubble_start">#34C759</color>
+    <color name="chat_user_bubble_end">#2E7D32</color>
+    <color name="chat_bot_bubble">#FFFFFF</color>
+    <color name="chat_input_background">#FFFFFF</color>
+    <color name="chat_input_stroke">#EAEAEB</color>
+    <color name="chat_text_primary">#1D1D1F</color>
+    <color name="chat_text_secondary">#8A8A8E</color>
+    <color name="chat_icon_tint">#6c757d</color>
+
     <color name="map_background">#F5F5F5</color>
     <color name="map_primary_green">#4CAF50</color>
     <color name="map_primary_green_dark">#2E7D32</color>

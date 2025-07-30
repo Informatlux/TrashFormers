@@ -14,6 +14,7 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -32,6 +33,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 import java.util.*
+import com.informatlux.test.ScoreManager
 
 class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
@@ -40,7 +42,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var aiService: AIService // Assuming you have this class in your project
     private var isVoiceModeEnabled = false
     private val conversationHistory = mutableListOf<String>()
-    private var currentEcoPoints = 12341
+    private val userId = "user1" // Replace with actual user ID logic
 
     // Your existing ActivityResultLaunchers are preserved.
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -49,20 +51,19 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private val speechLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            handleSpeechResult(result.data)
-        }
-    }
+//    private val speechLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//        if (result.resultCode == RESULT_OK) {
+//            handleSpeechResult(result.data)
+//        }
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-
         // Initialize services
         textToSpeech = TextToSpeech(this, this)
-        aiService = AIService(this) // Make sure you have AIService.kt in your project
+        aiService = AIService()
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -74,28 +75,17 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             logoutUser()
         }
 
+        // Setup UI and other initialization
         setupUIAndClickListeners()
         setupEntryAnimations()
         updateGreeting()
         requestPermissions()
+        updateEcoPointsDisplay()
     }
 
-    private fun logoutUser() {
-        // Clear the saved login state
-        val sharedPreferences = getSharedPreferences(LoginActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        with(sharedPreferences.edit()) {
-            putBoolean(LoginActivity.KEY_IS_LOGGED_IN, false)
-            apply()
-        }
-
-        // Navigate back to the LoginActivity
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivity(intent)
-        finish() // Close MainActivity
-    }
 
     private fun setupUIAndClickListeners() {
-        // --- Header ---
+        // Your other click listeners
         findViewById<ShapeableImageView>(R.id.profile_image).setOnClickListener { showToast("Profile clicked") }
         findViewById<ImageView>(R.id.notification_button).setOnClickListener { showToast("Notifications clicked") }
 
@@ -115,8 +105,12 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         // --- "See More" Links ---
         findViewById<TextView>(R.id.see_more_challenges).setOnClickListener { showAllChallenges() }
         findViewById<TextView>(R.id.see_more_activity).setOnClickListener { showAllActivity() }
+        findViewById<ShapeableImageView>(R.id.profile_image).setOnClickListener { showToast("Profile clicked") }
+        findViewById<ImageView>(R.id.notification_button).setOnClickListener { showToast("Notifications clicked") }
 
-        // --- Bottom Navigation ---
+        // Cards etc.
+
+        // Bottom Navigation
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -126,19 +120,23 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 }
                 R.id.nav_maps -> {
                     startActivity(Intent(this, MapsActivity::class.java))
+                    finish()
                     true
                 }
-                R.id.nav_scan -> {
+                R.id.nav_ai -> {
                     startActivity(Intent(this, AIActivity::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_article -> {
                     startActivity(Intent(this, ArticleActivity::class.java))
-                    finish()  // Optional: close current activity if needed
+                    finish()
                     true
                 }
-                R.id.nav_profile -> {
-                    showToast("Profile feature coming soon")
+                R.id.nav_more -> {
+                    // Show popup menu anchored to the BottomNavigationView
+                    startActivity(Intent(this, MoreActivity::class.java))
+                    finish()
                     true
                 }
                 else -> false
@@ -147,6 +145,32 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         bottomNav.selectedItemId = R.id.nav_home
     }
 
+    private fun setMenuIconsSize(popupMenu: PopupMenu, anchor: View, sizeDp: Int = 20) {
+        val menu = popupMenu.menu
+        val iconSizePx = (sizeDp * anchor.context.resources.displayMetrics.density).toInt()
+        for (i in 0 until menu.size()) {
+            val item = menu.getItem(i)
+            val icon = item.icon
+            if (icon != null) {
+                icon.setBounds(0, 0, iconSizePx, iconSizePx)
+                item.icon = icon
+            }
+        }
+    }
+
+    private fun logoutUser() {
+        // Clear the saved login state
+        val sharedPreferences = getSharedPreferences(LoginActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putBoolean(LoginActivity.KEY_IS_LOGGED_IN, false)
+            apply()
+        }
+
+        // Navigate back to the LoginActivity
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish() // Close MainActivity
+    }
 
     private fun setupEntryAnimations() {
         try {
@@ -190,36 +214,36 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     // --- All of your original AI and helper functions are preserved below ---
 
-    private fun showClassificationOptions() {
-        val options = arrayOf("📷 Take Photo", "📝 Describe Item")
-        AlertDialog.Builder(this)
-            .setTitle("🌿 Waste Classification")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> captureImageForClassification()
-                    1 -> showTextClassificationDialog()
-                }
-            }
-            .show()
-    }
+//    private fun showClassificationOptions() {
+//        val options = arrayOf("📷 Take Photo", "📝 Describe Item")
+//        AlertDialog.Builder(this)
+//            .setTitle("🌿 Waste Classification")
+//            .setItems(options) { _, which ->
+//                when (which) {
+//                    0 -> captureImageForClassification()
+//                    1 -> showTextClassificationDialog()
+//                }
+//            }
+//            .show()
+//    }
 
-    private fun startEcoBot() {
-        val options = arrayOf("Voice Chat", "Text Chat", "Toggle Voice Mode")
-        AlertDialog.Builder(this)
-            .setTitle("🌿 AI EcoBot")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> startVoiceChat()
-                    1 -> startTextChat()
-                    2 -> toggleVoiceMode()
-                }
-            }
-            .show()
-    }
+//    private fun startEcoBot() {
+//        val options = arrayOf("Voice Chat", "Text Chat", "Toggle Voice Mode")
+//        AlertDialog.Builder(this)
+//            .setTitle("🌿 AI EcoBot")
+//            .setItems(options) { _, which ->
+//                when (which) {
+//                    0 -> startVoiceChat()
+//                    1 -> startTextChat()
+//                    2 -> toggleVoiceMode()
+//                }
+//            }
+//            .show()
+//    }
 
     private fun showEcoScoreDetails() {
         val details = """
-            🏆 Your EcoScore: ${String.format("%,d", currentEcoPoints)} points
+            🏆 Your EcoScore: ${String.format("%,d", ScoreManager.getScore(userId))} points
             
             Recent Achievements:
             🏆 Recycling Champion (100 pts)
@@ -239,77 +263,77 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun showTextClassificationDialog() {
-        showInputDialog("Describe Item", "Describe the item you want to classify...") { description ->
-            classifyWasteItem(description)
-        }
-    }
+//    private fun showTextClassificationDialog() {
+//        showInputDialog("Describe Item", "Describe the item you want to classify...") { description ->
+//            classifyWasteItem(description)
+//        }
+//    }
 
-    private fun classifyWasteItem(description: String) {
-        lifecycleScope.launch {
-            try {
-                showProgressDialog("Analyzing waste item...")
-                val classification = aiService.classifyWaste(description)
-                hideProgressDialog()
-                showResponseDialog("AI Classification Result", classification)
+//    private fun classifyWasteItem(description: String) {
+//        lifecycleScope.launch {
+//            try {
+//                showProgressDialog("Analyzing waste item...")
+//                val classification = aiService.classifyWaste(description)
+//                hideProgressDialog()
+//                showResponseDialog("AI Classification Result", classification)
+//
+//                val pointsRegex = "EcoPoints: (\\d+)".toRegex()
+//                val points = pointsRegex.find(classification)?.groupValues?.get(1)?.toIntOrNull() ?: 10
+//                addEcoPoints(points)
+//            } catch (e: Exception) {
+//                hideProgressDialog()
+//                showErrorDialog("Classification Error", "Failed to classify waste item. Please try again.")
+//            }
+//        }
+//    }
 
-                val pointsRegex = "EcoPoints: (\\d+)".toRegex()
-                val points = pointsRegex.find(classification)?.groupValues?.get(1)?.toIntOrNull() ?: 10
-                addEcoPoints(points)
-            } catch (e: Exception) {
-                hideProgressDialog()
-                showErrorDialog("Classification Error", "Failed to classify waste item. Please try again.")
-            }
-        }
-    }
+//    private fun startVoiceChat() {
+//        if (checkPermission(Manifest.permission.RECORD_AUDIO)) {
+//            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+//                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+//                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+//                putExtra(RecognizerIntent.EXTRA_PROMPT, "Ask me about waste management...")
+//            }
+//            speechLauncher.launch(intent)
+//        }
+//    }
 
-    private fun startVoiceChat() {
-        if (checkPermission(Manifest.permission.RECORD_AUDIO)) {
-            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-                putExtra(RecognizerIntent.EXTRA_PROMPT, "Ask me about waste management...")
-            }
-            speechLauncher.launch(intent)
-        }
-    }
-
-    private fun startTextChat() {
-        showInputDialog("AI EcoBot", "Ask me about waste management...") { input ->
-            processEcoBotQuery(input)
-        }
-    }
+//    private fun startTextChat() {
+//        showInputDialog("AI EcoBot", "Ask me about waste management...") { input ->
+//            processEcoBotQuery(input)
+//        }
+//    }
 
     private fun toggleVoiceMode() {
         isVoiceModeEnabled = !isVoiceModeEnabled
         showToast("Voice mode ${if (isVoiceModeEnabled) "enabled" else "disabled"}")
     }
 
-    private fun processEcoBotQuery(query: String) {
-        lifecycleScope.launch {
-            try {
-                showProgressDialog("EcoBot is thinking...")
-                conversationHistory.add("User: $query")
-
-                val response = aiService.chatWithEcoBot(query, conversationHistory)
-                conversationHistory.add("EcoBot: $response")
-
-                if (conversationHistory.size > 8) {
-                    conversationHistory.subList(0, 2).clear()
-                }
-
-                hideProgressDialog()
-                showResponseDialog("🤖 EcoBot Response", response)
-
-                if (isVoiceModeEnabled && ::textToSpeech.isInitialized) {
-                    textToSpeech.speak(response, TextToSpeech.QUEUE_FLUSH, null, null)
-                }
-            } catch (e: Exception) {
-                hideProgressDialog()
-                showErrorDialog("EcoBot Error", "Failed to get response from EcoBot. Please try again.")
-            }
-        }
-    }
+//    private fun processEcoBotQuery(query: String) {
+//        lifecycleScope.launch {
+//            try {
+//                showProgressDialog("EcoBot is thinking...")
+//                conversationHistory.add("User: $query")
+//
+//                val response = aiService.chatWithEcoBot(query, conversationHistory)
+//                conversationHistory.add("EcoBot: $response")
+//
+//                if (conversationHistory.size > 8) {
+//                    conversationHistory.subList(0, 2).clear()
+//                }
+//
+//                hideProgressDialog()
+//                showResponseDialog("🤖 EcoBot Response", response)
+//
+//                if (isVoiceModeEnabled && ::textToSpeech.isInitialized) {
+//                    textToSpeech.speak(response, TextToSpeech.QUEUE_FLUSH, null, null)
+//                }
+//            } catch (e: Exception) {
+//                hideProgressDialog()
+//                showErrorDialog("EcoBot Error", "Failed to get response from EcoBot. Please try again.")
+//            }
+//        }
+//    }
 
     private fun requestPermissions() {
         val permissions = arrayOf(
@@ -328,13 +352,13 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         showToast("Image captured - Processing for classification...")
     }
 
-    private fun handleSpeechResult(data: Intent?) {
-        data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.let { results ->
-            if (results.isNotEmpty()) {
-                processEcoBotQuery(results[0])
-            }
-        }
-    }
+//    private fun handleSpeechResult(data: Intent?) {
+//        data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.let { results ->
+//            if (results.isNotEmpty()) {
+//                processEcoBotQuery(results[0])
+//            }
+//        }
+//    }
 
     private fun checkPermission(permission: String): Boolean {
         return if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
@@ -416,11 +440,31 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         showToast("Showing all activity...")
     }
 
-    private fun addEcoPoints(points: Int) {
-        currentEcoPoints += points
-        findViewById<TextView>(R.id.total_points_text)?.text = "${String.format("%,d", currentEcoPoints)} Points"
-        showToast("✅ +$points EcoPoints earned!")
+    private fun updateEcoPointsDisplay() {
+        val points = ScoreManager.getScore(userId)
+        findViewById<TextView>(R.id.total_points_text).text = points.toString()
     }
+
+    private fun onWasteClassified() {
+        ScoreManager.addPoints(userId, ScoreManager.POINTS_WASTE_CLASSIFICATION)
+        updateEcoPointsDisplay()
+    }
+
+    private fun onSearchRecyclingCenter() {
+        ScoreManager.addPoints(userId, ScoreManager.POINTS_SEARCH_RECYCLING_CENTER)
+        updateEcoPointsDisplay()
+    }
+
+    private fun onDecompositionQuery() {
+        ScoreManager.addPoints(userId, ScoreManager.POINTS_DECOMPOSITION_QUERY)
+        updateEcoPointsDisplay()
+    }
+
+    private fun onAIQuestion() {
+        ScoreManager.addPoints(userId, ScoreManager.POINTS_AI_QUESTION)
+        updateEcoPointsDisplay()
+    }
+
 
     private var progressDialog: AlertDialog? = null
 
@@ -438,6 +482,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         progressDialog = null
     }
 
+
     // FIX: Added the missing helper function.
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
@@ -448,9 +493,6 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         if (::textToSpeech.isInitialized) {
             textToSpeech.stop()
             textToSpeech.shutdown()
-        }
-        if (::aiService.isInitialized) {
-            aiService.cleanup()
         }
         progressDialog?.dismiss()
     }
