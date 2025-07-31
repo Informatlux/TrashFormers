@@ -47,9 +47,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private var isVoiceModeEnabled = false
     private val conversationHistory = mutableListOf<String>()
     private lateinit var supabase: SupabaseClient
-    private val userId: String by lazy {
-        UserManager.getCurrentUserId()
-    }
+    private var userId: String = ""
     companion object{
         private const val SUPABASE_URL = "https://jedpwwxjrsejumyqyrgx.supabase.co"
         private const val SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImplZHB3d3hqcnNlanVteXF5cmd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4NzYzMzQsImV4cCI6MjA2OTQ1MjMzNH0.x9iFEmjd8ldd_llmc70ZfVqV3BBsUx1MSLnZbFCPlxI"
@@ -72,7 +70,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         UserManager.initialize(application)
-        // Initialize services
+
         textToSpeech = TextToSpeech(this, this)
         aiService = AIService()
 
@@ -80,36 +78,35 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             supabaseUrl = SUPABASE_URL,
             supabaseKey = SUPABASE_ANON_KEY
         ) {
-            defaultSerializer = KotlinXSerializer(Json {
-                ignoreUnknownKeys = true
-            })
-
-            install(Auth) {
-                alwaysAutoRefresh = false
-                autoLoadFromStorage = false
-            }
-
-            install(Postgrest) {
-                defaultSchema = "public"
-            }
+            defaultSerializer = KotlinXSerializer(Json { ignoreUnknownKeys = true })
+            install(Auth) { alwaysAutoRefresh = false; autoLoadFromStorage = false }
+            install(Postgrest) { defaultSchema = "public" }
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(bars.left, bars.top, bars.right, 0)
             insets
         }
 
-
-        // Setup UI and other initialization
         setupUIAndClickListeners()
         setupEntryAnimations()
-        displayUserFullName()
         updateGreeting()
         requestPermissions()
-        updateEcoPointsDisplay()
-    }
 
+        // 2️⃣ Load userId in coroutine, then update UI that depends on it
+        lifecycleScope.launch {
+            try {
+                userId = UserManager.getCurrentUserId()
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Failed to load userId", e)
+                userId = ""
+            }
+            // Now that userId is set:
+            displayUserFullName()
+            updateEcoPointsDisplay()
+        }
+    }
 
     private fun setupUIAndClickListeners() {
         // Your other click listeners

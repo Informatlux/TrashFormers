@@ -31,9 +31,7 @@ import kotlinx.serialization.json.Json
 class ArticleActivity : AppCompatActivity() {
 
     private lateinit var supabase: SupabaseClient
-    private val userId: String by lazy {
-        UserManager.getCurrentUserId()
-    }
+    private var userId: String = ""
 
     companion object{
         private const val SUPABASE_URL = "https://jedpwwxjrsejumyqyrgx.supabase.co"
@@ -46,35 +44,29 @@ class ArticleActivity : AppCompatActivity() {
         setContentView(R.layout.activity_article)
         UserManager.initialize(application)
 
-        // Handles the status bar padding for edge-to-edge display
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
-            insets
-        }
-
+        // 1️⃣ Initialize Supabase immediately
         supabase = createSupabaseClient(
             supabaseUrl = SUPABASE_URL,
             supabaseKey = SUPABASE_ANON_KEY
         ) {
-            defaultSerializer = KotlinXSerializer(Json {
-                ignoreUnknownKeys = true
-            })
+            defaultSerializer = KotlinXSerializer(Json { ignoreUnknownKeys = true })
+            install(Auth) { alwaysAutoRefresh = false; autoLoadFromStorage = false }
+            install(Postgrest) { defaultSchema = "public" }
+        }
 
-            install(Auth) {
-                alwaysAutoRefresh = false
-                autoLoadFromStorage = false
-            }
-
-            install(Postgrest) {
-                defaultSchema = "public"
+        // 2️⃣ Fetch userId and do user‐dependent UI setup
+        lifecycleScope.launch {
+            try {
+                userId = UserManager.getCurrentUserId()
+                displayUserFullName()
+                updateEcoPointsDisplay()
+            } catch (e: Exception) {
+                Log.e("ArticleActivity", "Failed to load userId", e)
             }
         }
 
         setupClickListeners()
-        displayUserFullName()
         setupEntryAnimations()
-        updateEcoPointsDisplay()
     }
 
 

@@ -4,7 +4,6 @@ package com.informatlux.test.services
 import android.content.Context
 import android.util.Log
 import com.informatlux.test.models.Event
-import com.informatlux.test.models.EventParticipant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray

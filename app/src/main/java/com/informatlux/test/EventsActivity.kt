@@ -9,12 +9,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import android.widget.TextView
 import com.informatlux.test.models.Event
 
 class EventsActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: EventsViewModel
+    private val viewModel: EventsViewModel by viewModels()
     private lateinit var eventsAdapter: EventsAdapter
     private val userId = "user1" // Replace with actual user ID logic
 
@@ -31,29 +30,24 @@ class EventsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_events)
 
-        viewModel = ViewModelProvider(this)[EventsViewModel::class.java]
-
         val recyclerView = findViewById<RecyclerView>(R.id.events_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         viewModel.eventsList.observe(this) { list ->
-            eventsAdapter = EventsAdapter(list) { event ->
-                joinEvent(event)
-            }
+            eventsAdapter = EventsAdapter(list as List<Event>) { event -> joinEvent(event) }
             recyclerView.adapter = eventsAdapter
         }
 
-        findViewById<ExtendedFloatingActionButton>(R.id.fab_create_event).setOnClickListener {
-            val intent = Intent(this, CreateEventActivity::class.java)
-            createEventLauncher.launch(intent)
-        }
-
-        updateEcoPointsDisplay()
+        findViewById<ExtendedFloatingActionButton>(R.id.fab_create_event)
+            .setOnClickListener {
+                val intent = Intent(this, CreateEventActivity::class.java)
+                createEventLauncher.launch(intent)
+            }
     }
 
     private fun joinEvent(event: Event) {
         if (!event.participants.contains(userId)) {
-            event.participants.add(userId)
+            event.participants.add(userId) // Ensure 'participants' is mutable and correctly typed
             viewModel.updateEvent(event)
             ScoreManager.addPoints(userId, ScoreManager.POINTS_EVENT_PARTICIPATION)
             updateEcoPointsDisplay()

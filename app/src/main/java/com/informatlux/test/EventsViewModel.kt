@@ -3,6 +3,7 @@ package com.informatlux.test
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.informatlux.test.models.Event
 
 class EventsViewModel : ViewModel() {
 
@@ -18,18 +19,26 @@ class EventsViewModel : ViewModel() {
         loadEvents()
     }
 
+    private val store = mutableListOf<Event>()
+
+    fun addEvent(e: Event) {
+        store += e
+        _eventsList.value = store.toList()
+    }
+
+    fun updateEvent(updated: Event) {
+        val idx = store.indexOfFirst { it.id == updated.id }
+        if (idx >= 0) {
+            store[idx] = updated
+            _eventsList.value = store.toList()
+        }
+    }
+
     private fun loadEvents() {
 
         updateGroupedList()
     }
 
-
-    fun addEvent(event: Event) {
-
-        allEvents.add(0, event)
-
-        updateGroupedList()
-    }
 
     private fun updateGroupedList() {
         // Create a new list that can hold both Strings (headers) and Event objects.

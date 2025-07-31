@@ -17,7 +17,8 @@ data class ChatHistorySession(
 
 class ChatHistoryAdapter(
     private var sessions: List<ChatHistorySession>,
-    private val onSessionClick: (String) -> Unit
+    private val onSessionClick: (String) -> Unit,
+    private val onSessionLongClick: ((String) -> Unit)? = null
 ) : RecyclerView.Adapter<ChatHistoryAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -40,6 +41,11 @@ class ChatHistoryAdapter(
 
         holder.itemView.setOnClickListener {
             onSessionClick(session.id)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onSessionLongClick?.invoke(session.id)
+            true
         }
     }
 

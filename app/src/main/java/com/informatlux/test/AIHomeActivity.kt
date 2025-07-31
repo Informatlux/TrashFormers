@@ -23,6 +23,9 @@ class AIActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_ai_home)
 
+        // Initialize UserManager
+        UserManager.initialize(this)
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
@@ -38,12 +41,26 @@ class AIActivity : AppCompatActivity() {
         // Use a different ID that exists in your layout
         chatHistoryRecyclerView = findViewById(R.id.history_recycler_view) // Change this to match your layout
         chatHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
-        chatHistoryAdapter = ChatHistoryAdapter(emptyList()) { sessionId ->
-            // Open chat session
-            val intent = Intent(this, AIChatActivity::class.java)
-            intent.putExtra("session_id", sessionId)
-            startActivity(intent)
-        }
+        chatHistoryAdapter = ChatHistoryAdapter(
+            emptyList(),
+            onSessionClick = { sessionId ->
+                // Open chat session
+                val intent = Intent(this, AIChatActivity::class.java)
+                intent.putExtra("session_id", sessionId)
+                startActivity(intent)
+            },
+            onSessionLongClick = { sessionId ->
+                // Delete session with confirmation
+                androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Delete Chat")
+                    .setMessage("Are you sure you want to delete this chat session?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        viewModel.deleteSession(sessionId)
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+        )
         chatHistoryRecyclerView.adapter = chatHistoryAdapter
 
         // Observe chat sessions from ViewModel and convert to ChatHistorySession
@@ -58,6 +75,12 @@ class AIActivity : AppCompatActivity() {
             }
             chatHistoryAdapter.updateSessions(historySession)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Refresh chat sessions when returning to this activity
+        viewModel.loadChatSessions()
     }
 
     private fun setupNewChatButton() {

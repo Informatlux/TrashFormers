@@ -14,7 +14,7 @@ import java.io.ByteArrayOutputStream
 object DeepSeekService {
     private const val TAG = "DeepSeekService"
     private const val API_URL = "https://openrouter.ai/api/v1/chat/completions"
-    private const val API_KEY = "Bearer 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"
+    private const val API_KEY = "Bearer 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"
     private const val MAX_IMAGE_DIM = 256 // <= Resize images to a max of 256px (width or height)
 
     // Context and language hints

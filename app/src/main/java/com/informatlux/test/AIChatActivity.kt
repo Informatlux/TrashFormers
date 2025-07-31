@@ -32,6 +32,7 @@ class AIChatActivity : AppCompatActivity() {
     private lateinit var btnMic: ImageButton
     private lateinit var toolbarTitle: TextView
     private var tempImageUri: Uri? = null
+    private var currentSessionId: String? = null
 
     // TTS (Speech Recognition) variables
     private var speechRecognizer: SpeechRecognizer? = null
@@ -46,6 +47,9 @@ class AIChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_aichat)
+
+        // Initialize UserManager
+        UserManager.initialize(this)
 
         initializeViews()
         setupRecyclerView()
@@ -129,11 +133,13 @@ class AIChatActivity : AppCompatActivity() {
 
     private fun handleSessionIntent() {
         val sessionId = intent.getStringExtra("session_id")
+        currentSessionId = sessionId
+
         if (sessionId != null) {
             viewModel.loadSession(sessionId)
+            toolbarTitle.text = "Loading..."
         } else {
             viewModel.createNewSession()
-            // Set default title until AI generates one
             toolbarTitle.text = "New Chat"
         }
     }
@@ -266,6 +272,8 @@ class AIChatActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         speechRecognizer?.destroy()
+        // Save current session
+        viewModel.saveCurrentSession()
     }
 
     override fun onPause() {
@@ -273,5 +281,13 @@ class AIChatActivity : AppCompatActivity() {
         if (isListening) {
             stopListening()
         }
+        // Save current session when pausing
+        viewModel.saveCurrentSession()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Save current session when stopping
+        viewModel.saveCurrentSession()
     }
 }
