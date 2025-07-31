@@ -5,14 +5,16 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.informatlux.test.ScoreManager
+import android.widget.TextView
+import com.informatlux.test.models.Event
 
 class EventsActivity : AppCompatActivity() {
 
-    private val viewModel: EventsViewModel by viewModels()
+    private lateinit var viewModel: EventsViewModel
     private lateinit var eventsAdapter: EventsAdapter
     private val userId = "user1" // Replace with actual user ID logic
 
@@ -29,11 +31,15 @@ class EventsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_events)
 
+        viewModel = ViewModelProvider(this)[EventsViewModel::class.java]
+
         val recyclerView = findViewById<RecyclerView>(R.id.events_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         viewModel.eventsList.observe(this) { list ->
-            eventsAdapter = EventsAdapter(list)
+            eventsAdapter = EventsAdapter(list) { event ->
+                joinEvent(event)
+            }
             recyclerView.adapter = eventsAdapter
         }
 
@@ -41,16 +47,20 @@ class EventsActivity : AppCompatActivity() {
             val intent = Intent(this, CreateEventActivity::class.java)
             createEventLauncher.launch(intent)
         }
-    }
 
-    // Example: When user participates in an event
-    private fun onEventParticipated() {
-        ScoreManager.addPoints(userId, ScoreManager.POINTS_EVENT_PARTICIPATION)
         updateEcoPointsDisplay()
     }
+
+    private fun joinEvent(event: Event) {
+        if (!event.participants.contains(userId)) {
+            event.participants.add(userId)
+            viewModel.updateEvent(event)
+            ScoreManager.addPoints(userId, ScoreManager.POINTS_EVENT_PARTICIPATION)
+            updateEcoPointsDisplay()
+        }
+    }
+
     private fun updateEcoPointsDisplay() {
         val points = ScoreManager.getScore(userId)
-        // Update the UI with the new points, e.g.:
-        // findViewById<TextView>(R.id.eco_points_text).text = points.toString()
     }
 }

@@ -1,95 +1,146 @@
+
 package com.informatlux.test
 
-import android.app.Activity
 import android.app.DatePickerDialog
-import android.content.Intent
-import android.net.Uri
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.appbar.MaterialToolbar
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textfield.TextInputEditText
-import java.util.Calendar
+import com.informatlux.test.models.Event
+import com.informatlux.test.services.SupaBaseServiceEvents
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CreateEventActivity : AppCompatActivity() {
 
-    private var selectedBannerUri: Uri? = null
-    private lateinit var imageBannerPreview: ShapeableImageView
-    private lateinit var inputDate: TextInputEditText
+    private lateinit var supabaseService: SupaBaseServiceEvents
+    private var selectedDate: Calendar? = null
 
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            selectedBannerUri = it
-            imageBannerPreview.setImageURI(it)
-        }
-    }
+    private lateinit var titleEditText: TextInputEditText
+    private lateinit var descriptionEditText: TextInputEditText
+    private lateinit var locationEditText: TextInputEditText
+    private lateinit var pointsEditText: TextInputEditText
+    private lateinit var maxParticipantsEditText: TextInputEditText
+    private lateinit var imageUrlEditText: TextInputEditText
+    private lateinit var dateButton: MaterialButton
+    private lateinit var createButton: MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_create_event)
 
-        // Initialize all views
-        imageBannerPreview = findViewById(R.id.image_banner_preview)
-        inputDate = findViewById(R.id.input_event_date)
-        val inputTitle = findViewById<TextInputEditText>(R.id.input_event_title)
-        val inputDesc = findViewById<TextInputEditText>(R.id.input_event_description)
-        val inputLocation = findViewById<TextInputEditText>(R.id.input_event_location)
-
-        // Setup Toolbar
-        findViewById<MaterialToolbar>(R.id.toolbar).setNavigationOnClickListener { finish() }
-
-        // Setup Click Listeners
-        imageBannerPreview.setOnClickListener {
-            // Launch the image picker to get a banner
-            pickImageLauncher.launch("image/*")
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
         }
 
-        inputDate.setOnClickListener {
-            // Show a calendar to pick a date
-            showDatePickerDialog()
+        supabaseService = SupaBaseServiceEvents(this)
+        initializeViews()
+        setupClickListeners()
+    }
+
+    private fun initializeViews() {
+        titleEditText = findViewById(R.id.edit_event_title)
+        descriptionEditText = findViewById(R.id.edit_event_description)
+        locationEditText = findViewById(R.id.edit_event_location)
+        pointsEditText = findViewById(R.id.edit_event_points)
+        maxParticipantsEditText = findViewById(R.id.edit_max_participants)
+        imageUrlEditText = findViewById(R.id.edit_image_url)
+        dateButton = findViewById(R.id.btn_select_date)
+        createButton = findViewById(R.id.btn_create_event)
+    }
+
+    private fun setupClickListeners() {
+        dateButton.setOnClickListener {
+            showDateTimePicker()
         }
 
-        findViewById<MaterialButton>(R.id.btn_create_event).setOnClickListener {
-            val title = inputTitle.text.toString().trim()
-            val desc = inputDesc.text.toString().trim()
-            val date = inputDate.text.toString().trim()
-            val location = inputLocation.text.toString().trim()
+        createButton.setOnClickListener {
+            createEvent()
+        }
 
-            // Validate all input fields, including the banner image
-            if (title.isBlank() || desc.isBlank() || date.isBlank() || location.isBlank() || selectedBannerUri == null) {
-                Toast.makeText(this, "Please fill all fields and select a banner", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // FIX: Create the Event object using named arguments to match the data class.
-            // The 'id' and 'isOngoing' fields have default values in the data class,
-            // so we don't need to provide them here unless we want to override them.
-            val newEvent = Event(
-                title = title,
-                description = desc,
-                date = date,
-                location = location,
-                bannerUri = selectedBannerUri
-            )
-
-            // Create an intent to pass the new event data back to EventsActivity
-            val resultIntent = Intent()
-            resultIntent.putExtra("NEW_EVENT", newEvent)
-            setResult(Activity.RESULT_OK, resultIntent)
-            finish() // Close this activity and return to the list
+        findViewById<MaterialButton>(R.id.btn_back)?.setOnClickListener {
+            finish()
         }
     }
-    private fun showDatePickerDialog() {
-        val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-        DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
-            inputDate.setText("$selectedDay/${selectedMonth + 1}/$selectedYear")
-        }, year, month, day).show()
+    private fun showDateTimePicker() {
+        val calendar = Calendar.getInstance()
+
+        DatePickerDialog(this, { _, year, month, dayOfMonth ->
+            TimePickerDialog(this, { _, hourOfDay, minute ->
+                selectedDate = Calendar.getInstance().apply {
+                    set(year, month, dayOfMonth, hourOfDay, minute)
+                }
+                updateDateButton()
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+    }
+
+    private fun updateDateButton() {
+        selectedDate?.let { date ->
+            val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+            dateButton.text = dateFormat.format(date.time)
+        }
+    }
+
+    private fun createEvent() {
+        val title = titleEditText.text.toString().trim()
+        val description = descriptionEditText.text.toString().trim()
+        val location = locationEditText.text.toString().trim()
+        val pointsText = pointsEditText.text.toString().trim()
+        val maxParticipantsText = maxParticipantsEditText.text.toString().trim()
+        val imageUrl = imageUrlEditText.text.toString().trim()
+
+        if (title.isEmpty()) {
+            titleEditText.error = "Title is required"
+            return
+        }
+
+        if (description.isEmpty()) {
+            descriptionEditText.error = "Description is required"
+            return
+        }
+
+        val points = pointsText.toIntOrNull() ?: 0
+        val maxParticipants = maxParticipantsText.toIntOrNull() ?: 0
+
+        val event = Event(
+            title = title,
+            description = description,
+            location = location,
+            eventDate = selectedDate?.time,
+            pointsReward = points,
+            maxParticipants = maxParticipants,
+            imageUrl = imageUrl.ifEmpty { "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800" },
+            createdBy = "current_user_id", // Replace with actual user ID from auth
+            category = "challenge"
+        )
+
+        createButton.isEnabled = false
+        createButton.text = "Creating..."
+
+        lifecycleScope.launch {
+            supabaseService.createEvent(event).fold(
+                onSuccess = { createdEvent ->
+                    Toast.makeText(this@CreateEventActivity, "Event created successfully!", Toast.LENGTH_SHORT).show()
+                    finish()
+                },
+                onFailure = { error ->
+                    Toast.makeText(this@CreateEventActivity, "Failed to create event: ${error.message}", Toast.LENGTH_LONG).show()
+                    createButton.isEnabled = true
+                    createButton.text = "Create Event"
+                }
+            )
+        }
     }
 }

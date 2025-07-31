@@ -51,15 +51,25 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
     private val _sessionTitle = MutableLiveData<String>("New Chat")
     val sessionTitle: LiveData<String> = _sessionTitle
 
+    private val _isOfflineMode = MutableLiveData<Boolean>(false)
+    val isOfflineMode: LiveData<Boolean> = _isOfflineMode
+
     private val messageList = mutableListOf<ChatMessage>()
     private val prefs = application.getSharedPreferences("chat_history", Context.MODE_PRIVATE)
-    private val userId = "user1" // Replace with actual user ID logic
+
+    // Use UserManager for proper user ID management
+    private val userId: String by lazy {
+        UserManager.getCurrentUserId()
+    }
 
     private lateinit var supabase: SupabaseClient
     private var currentSessionId: String? = null
+    private var supabaseAvailable = false
 
     init {
         Log.d(TAG, "Initializing AIChatViewModel")
+        // Initialize UserManager
+        UserManager.initialize(application)
         initializeSupabase()
         loadHistory()
     }
@@ -81,140 +91,228 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
                 }
 
                 install(Postgrest) {
-                    defaultSchema = "public"
+                    // Use "public" schema now that we've set up proper permissions
+                    defaultSchema = "api"
                 }
 
                 install(Storage)
             }
-            Log.d(TAG, "Supabase client initialized successfully")
+            supabaseAvailable = true
+            _isOfflineMode.value = false
+            Log.d(TAG, "Supabase client initialized successfully with user ID: $userId")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize Supabase client", e)
+            supabaseAvailable = false
+            _isOfflineMode.value = true
         }
     }
 
     fun createNewSession() {
-        Log.d(TAG, "Creating new chat session")
-        viewModelScope.launch {
-            try {
-                val sessionData = ChatSession(
-                    id = UUID.randomUUID().toString(),
-                    user_id = userId,
-                    title = "New Chat ${Date().time}",
-                    created_at = null
-                )
+        Log.d(TAG, "Creating new chat session for user: $userId")
+        currentSessionId = UUID.randomUUID().toString()
 
-                Log.d(TAG, "Inserting session data: $sessionData")
-                val response = supabase.postgrest["chat_sessions"]
-                    .insert(sessionData) {
-                        select()
-                    }
+        if (supabaseAvailable) {
+            viewModelScope.launch {
+                try {
+                    val sessionData = ChatSession(
+                        id = currentSessionId!!,
+                        user_id = userId,
+                        title = "New Chat",
+                        created_at = null
+                    )
 
-                val sessions = response.decodeList<ChatSession>()
-                currentSessionId = sessions.firstOrNull()?.id
-                Log.d(TAG, "Created session with ID: $currentSessionId")
+                    Log.d(TAG, "Inserting session data: $sessionData")
+                    supabase.postgrest["chat_sessions"]
+                        .insert(sessionData)
 
-                // Clear current messages
-                messageList.clear()
-                _messages.value = emptyList()
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to create session in Supabase", e)
-                // Handle error - create local session
-                currentSessionId = UUID.randomUUID().toString()
-                messageList.clear()
-                _messages.value = emptyList()
+                    Log.d(TAG, "Created session with ID: $currentSessionId")
+                    _isOfflineMode.value = false
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to create session in Supabase", e)
+                    _isOfflineMode.value = true
+                    handleSupabaseError(e)
+                }
             }
+        } else {
+            _isOfflineMode.value = true
+            Log.d(TAG, "Working in offline mode - session created locally")
         }
+
+        // Clear current messages regardless of online/offline status
+        messageList.clear()
+        _messages.value = emptyList()
+        _sessionTitle.value = "New Chat"
     }
 
     fun loadSession(sessionId: String) {
         Log.d(TAG, "Loading session: $sessionId")
         currentSessionId = sessionId
-        viewModelScope.launch {
-            try {
-                Log.d(TAG, "Fetching messages for session: $sessionId")
-                val response = supabase.postgrest["chat_messages"]
-                    .select(columns = Columns.list("*")) {
-                        filter {
-                            eq("session_id", sessionId)
-                        }
-                        order("created_at", order = Order.ASCENDING)
-                    }
 
-                val messages = response.decodeList<ChatMessageData>()
-                Log.d(TAG, "Loaded ${messages.size} messages from Supabase")
+        if (supabaseAvailable) {
+            viewModelScope.launch {
+                try {
+                    Log.d(TAG, "Fetching messages for session: $sessionId")
+                    val response = supabase.postgrest["chat_messages"]
+                        .select(columns = Columns.list("*")) {
+                            filter {
+                                eq("session_id", sessionId)
+                            }
+                            order("created_at", order = Order.ASCENDING)
+                        }
 
-                messageList.clear()
+                    val messages = response.decodeList<ChatMessageData>()
+                    Log.d(TAG, "Loaded ${messages.size} messages from Supabase")
 
-                for (msg in messages) {
-                    Log.d(TAG, "Processing message: ${msg.message_type} - ${msg.content?.take(50)}")
-                    when (msg.message_type) {
-                        "user" -> {
-                            msg.content?.let { content ->
-                                messageList.add(ChatMessage.UserMessage(content))
-                            }
-                        }
-                        "bot" -> {
-                            msg.content?.let { content ->
-                                messageList.add(ChatMessage.BotMessage(content, false))
-                            }
-                        }
-                        "image" -> {
-                            msg.image_url?.let { imageUrl ->
-                                messageList.add(ChatMessage.ImagePreviewMessage(Uri.parse(imageUrl)))
-                            }
-                        }
+                    loadMessagesFromData(messages)
+                    loadSessionTitle(sessionId)
+                    _isOfflineMode.value = false
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to load session from Supabase", e)
+                    _isOfflineMode.value = true
+                    handleSupabaseError(e)
+                    loadHistory() // Fallback to local storage
+                }
+            }
+        } else {
+            _isOfflineMode.value = true
+            loadHistory()
+        }
+    }
+
+    private fun loadMessagesFromData(messages: List<ChatMessageData>) {
+        messageList.clear()
+        for (msg in messages) {
+            when (msg.message_type) {
+                "user" -> {
+                    msg.content?.let { content ->
+                        messageList.add(ChatMessage.UserMessage(content))
                     }
                 }
-                _messages.value = messageList.toList()
-                Log.d(TAG, "Session loaded successfully with ${messageList.size} messages")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to load session from Supabase", e)
-                // Handle error - load from local storage
-                loadHistory()
+                "bot" -> {
+                    msg.content?.let { content ->
+                        messageList.add(ChatMessage.BotMessage(content, false))
+                    }
+                }
+                "image" -> {
+                    msg.image_url?.let { imageUrl ->
+                        messageList.add(ChatMessage.ImagePreviewMessage(Uri.parse(imageUrl)))
+                    }
+                }
             }
+        }
+        _messages.value = messageList.toList()
+    }
+
+    private suspend fun loadSessionTitle(sessionId: String) {
+        try {
+            val response = supabase.postgrest["chat_sessions"]
+                .select(columns = Columns.list("title")) {
+                    filter {
+                        eq("id", sessionId)
+                    }
+                }
+
+            val sessions = response.decodeList<ChatSession>()
+            sessions.firstOrNull()?.let { session ->
+                _sessionTitle.value = session.title
+                Log.d(TAG, "Loaded session title: ${session.title}")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load session title", e)
         }
     }
 
     fun sendMessage(userText: String) {
         Log.d(TAG, "Sending message: ${userText.take(50)}...")
+
+        // Ensure we have a session
+        if (currentSessionId == null) {
+            createNewSession()
+        }
+
         addMessage(ChatMessage.UserMessage(userText))
         addMessage(ChatMessage.BotMessage("", isLoading = true))
+
+        // Generate title for new sessions
+        if (messageList.size == 2) { // First message pair
+            generateSessionTitle(userText)
+        }
 
         viewModelScope.launch {
             try {
                 // Award points for asking AI
                 ScoreManager.addPoints(userId, ScoreManager.POINTS_AI_QUESTION)
+                detectAndScoreIntent(userText)
 
-                // Detect intent for scoring
-                if (userText.contains("decompose", true) || userText.contains("decomposition", true)) {
-                    ScoreManager.addPoints(userId, ScoreManager.POINTS_DECOMPOSITION_QUERY)
-                }
-                if (userText.contains("recycle", true) || userText.contains("recycling center", true)) {
-                    ScoreManager.addPoints(userId, ScoreManager.POINTS_SEARCH_RECYCLING_CENTER)
-                }
-                if (userText.contains("DIY", true) || userText.contains("best out of waste", true)) {
-                    ScoreManager.addPoints(userId, ScoreManager.POINTS_DIY_SUGGESTION)
-                }
-                if (userText.contains("classify", true) || userText.contains("waste type", true)) {
-                    ScoreManager.addPoints(userId, ScoreManager.POINTS_WASTE_CLASSIFICATION)
-                }
-
-                Log.d(TAG, "Calling DeepSeek API...")
+                Log.d(TAG, "Calling DeepSeek ..")
                 val response = DeepSeekService.askDeepSeek(userText)
                 Log.d(TAG, "Received response from DeepSeek: ${response.take(100)}...")
 
                 updateLastBotMessage(response)
-                saveToSupabase()
+
+                if (supabaseAvailable) {
+                    saveToSupabase()
+                } else {
+                    saveHistory()
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Error in sendMessage", e)
-                updateLastBotMessage("Sorry, I encountered an error. Please try again.")
-                saveHistory() // Fallback to local storage
+                val errorMessage = when {
+                    e.message?.contains("auth", true) == true ->
+                        "Authentication error. Please check your API credentials."
+                    e.message?.contains("network", true) == true ->
+                        "Network error. Please check your internet connection."
+                    else -> "Sorry, I encountered an error. Please try again."
+                }
+                updateLastBotMessage(errorMessage)
+                saveHistory() // Always save to local storage on error
+            }
+        }
+    }
+
+    private fun detectAndScoreIntent(userText: String) {
+        val lowerText = userText.lowercase()
+
+        when {
+            lowerText.contains("decompose") || lowerText.contains("decomposition") -> {
+                ScoreManager.addPoints(userId, ScoreManager.POINTS_DECOMPOSITION_QUERY)
+            }
+            lowerText.contains("recycle") || lowerText.contains("recycling center") -> {
+                ScoreManager.addPoints(userId, ScoreManager.POINTS_SEARCH_RECYCLING_CENTER)
+            }
+            lowerText.contains("diy") || lowerText.contains("best out of waste") -> {
+                ScoreManager.addPoints(userId, ScoreManager.POINTS_DIY_SUGGESTION)
+            }
+            lowerText.contains("classify") || lowerText.contains("waste type") -> {
+                ScoreManager.addPoints(userId, ScoreManager.POINTS_WASTE_CLASSIFICATION)
+            }
+        }
+    }
+
+    private fun handleSupabaseError(e: Exception) {
+        when {
+            e.message?.contains("permission denied", true) == true -> {
+                Log.w(TAG, "Database permissions not set up properly. Working in offline mode.")
+                addMessage(ChatMessage.BotMessage("📱 Working in offline mode. Your chats are saved locally.", false))
+            }
+            e.message?.contains("network", true) == true -> {
+                Log.w(TAG, "Network error. Working in offline mode.")
+                addMessage(ChatMessage.BotMessage("🌐 No internet connection. Working in offline mode.", false))
+            }
+            else -> {
+                Log.w(TAG, "Supabase error: ${e.message}. Working in offline mode.")
+                addMessage(ChatMessage.BotMessage("💾 Database unavailable. Your chats are saved locally.", false))
             }
         }
     }
 
     fun analyzeImage(imageUri: Uri, context: Context) {
         Log.d(TAG, "Analyzing image: $imageUri")
+
+        if (currentSessionId == null) {
+            createNewSession()
+        }
+
         addMessage(ChatMessage.ImagePreviewMessage(imageUri))
         addMessage(ChatMessage.BotMessage("", isLoading = true))
 
@@ -224,10 +322,13 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
                 if (bitmap != null) {
                     ScoreManager.addPoints(userId, ScoreManager.POINTS_WASTE_CLASSIFICATION)
 
-                    // Upload image to Supabase Storage
-                    Log.d(TAG, "Uploading image to Supabase Storage...")
-                    val imageUrl = uploadImageToStorage(bitmap)
-                    Log.d(TAG, "Image uploaded, URL: $imageUrl")
+                    var imageUrl = ""
+                    if (supabaseAvailable) {
+                        // Upload image to Supabase Storage
+                        Log.d(TAG, "Uploading image to Supabase Storage...")
+                        imageUrl = uploadImageToStorage(bitmap)
+                        Log.d(TAG, "Image uploaded, URL: $imageUrl")
+                    }
 
                     val prompt = "Identify the type of waste in this image, estimate decomposition time, suggest a DIY reuse, and provide a caption for proper disposal."
                     Log.d(TAG, "Calling DeepSeek API for image analysis...")
@@ -236,17 +337,21 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
 
                     updateLastBotMessage(response)
 
-                    // Save image message to Supabase
-                    saveImageMessageToSupabase(imageUrl)
+                    // Save to appropriate storage
+                    if (supabaseAvailable && imageUrl.isNotEmpty()) {
+                        saveImageMessageToSupabase(imageUrl)
+                        saveToSupabase()
+                    } else {
+                        saveHistory()
+                    }
                 } else {
                     Log.e(TAG, "Failed to load bitmap from URI")
-                    updateLastBotMessage("Could not load image.")
+                    updateLastBotMessage("Could not load image. Please try again with a different image.")
                 }
-                saveToSupabase()
             } catch (e: Exception) {
                 Log.e(TAG, "Error in analyzeImage", e)
                 updateLastBotMessage("Failed to analyze image. Please try again.")
-                saveHistory() // Fallback to local storage
+                saveHistory()
             }
         }
     }
@@ -309,8 +414,8 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private suspend fun saveToSupabase() {
-        if (currentSessionId == null) {
-            Log.w(TAG, "Cannot save to Supabase: no current session ID")
+        if (currentSessionId == null || !supabaseAvailable) {
+            Log.w(TAG, "Cannot save to Supabase: no session ID or Supabase unavailable")
             return
         }
 
@@ -325,7 +430,7 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
                     message_type = "user",
                     content = (lastUserMessage as ChatMessage.UserMessage).text
                 )
-                Log.d(TAG, "Saving user message to Supabase: ${userMessageData.content?.take(50)}...")
+                Log.d(TAG, "Saving user message to Supabase...")
                 supabase.postgrest["chat_messages"].insert(userMessageData)
             }
 
@@ -335,12 +440,14 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
                     message_type = "bot",
                     content = (lastBotMessage as ChatMessage.BotMessage).text
                 )
-                Log.d(TAG, "Saving bot message to Supabase: ${botMessageData.content?.take(50)}...")
+                Log.d(TAG, "Saving bot message to Supabase...")
                 supabase.postgrest["chat_messages"].insert(botMessageData)
             }
             Log.d(TAG, "Messages saved to Supabase successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save messages to Supabase", e)
+            _isOfflineMode.value = true
+            handleSupabaseError(e)
             // Fallback to local storage
             saveHistory()
         }
@@ -352,25 +459,29 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
             try {
                 val titlePrompt = "Generate a short, descriptive title (3-5 words max) for a chat conversation that starts with: \"$firstMessage\". Only respond with the title, nothing else."
                 val generatedTitle = DeepSeekService.askDeepSeek(titlePrompt)
-                val cleanTitle = generatedTitle.take(50).trim() // Limit length
+                val cleanTitle = generatedTitle.take(50).trim()
 
                 Log.d(TAG, "Generated title: $cleanTitle")
                 _sessionTitle.value = cleanTitle
 
-                // Update session title in database
-                updateSessionTitle(cleanTitle)
+                // Update session title in database if online
+                if (supabaseAvailable) {
+                    updateSessionTitle(cleanTitle)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to generate session title", e)
                 // Fallback to a simple title
                 val fallbackTitle = firstMessage.take(30).trim() + if (firstMessage.length > 30) "..." else ""
                 _sessionTitle.value = fallbackTitle
-                updateSessionTitle(fallbackTitle)
+                if (supabaseAvailable) {
+                    updateSessionTitle(fallbackTitle)
+                }
             }
         }
     }
 
     private suspend fun updateSessionTitle(title: String) {
-        if (currentSessionId != null) {
+        if (currentSessionId != null && supabaseAvailable) {
             try {
                 Log.d(TAG, "Updating session title to: $title")
                 supabase.postgrest["chat_sessions"]
@@ -384,6 +495,7 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
                 Log.d(TAG, "Session title updated successfully")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to update session title", e)
+                _isOfflineMode.value = true
             }
         }
     }
@@ -410,13 +522,28 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
             }
             arr.put(obj)
         }
-        prefs.edit().putString("history", arr.toString()).apply()
+
+        // Save with session ID as key for better organization
+        val key = if (currentSessionId != null) "history_$currentSessionId" else "history"
+        prefs.edit().putString(key, arr.toString()).apply()
+
+        // Also save current session ID
+        currentSessionId?.let { sessionId ->
+            prefs.edit().putString("current_session", sessionId).apply()
+        }
+
         Log.d(TAG, "Chat history saved to local storage")
     }
 
     private fun loadHistory() {
         Log.d(TAG, "Loading chat history from local storage")
-        val arrStr = prefs.getString("history", null) ?: return
+
+        // Try to load current session first
+        val sessionId = prefs.getString("current_session", null)
+        val key = if (sessionId != null) "history_$sessionId" else "history"
+
+        val arrStr = prefs.getString(key, null) ?: return
+
         try {
             val arr = JSONArray(arrStr)
             messageList.clear()
@@ -429,10 +556,15 @@ class AIChatViewModel(application: Application) : AndroidViewModel(application) 
                 }
             }
             _messages.value = messageList.toList()
+
+            // Set session ID if we loaded one
+            if (sessionId != null) {
+                currentSessionId = sessionId
+            }
+
             Log.d(TAG, "Loaded ${messageList.size} messages from local storage")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load chat history from local storage", e)
-            // Handle JSON parsing error
             messageList.clear()
             _messages.value = emptyList()
         }

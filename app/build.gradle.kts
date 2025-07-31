@@ -89,12 +89,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.4.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
-    // Firebase BOM and components
-    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore:26.0.0")
-    implementation("com.google.firebase:firebase-storage:22.0.0")
-    implementation("com.google.firebase:firebase-analytics")
 
     // Identity and Credentials
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")

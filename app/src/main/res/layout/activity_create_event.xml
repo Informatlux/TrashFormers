@@ -1,121 +1,277 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="@color/white"
+    android:fillViewport="true">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/close_icon"
-            app:title="Create New Event" />
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="32dp">
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/image_banner_preview"
-                android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:background="#EAEAEB"
-                android:scaleType="centerCrop"
-                android:src="@drawable/add_photo_icon"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Large" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="←"
+                android:textSize="24sp"
+                android:textColor="@color/apple_text_primary"
+                app:backgroundTint="@android:color/transparent"
+                app:strokeWidth="0dp"
+                app:cornerRadius="12dp" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Tap image to upload a banner"
-                android:textSize="12sp"
-                android:layout_gravity="center_horizontal"/>
+                android:layout_weight="1"
+                android:text="Create Event"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/apple_text_primary"
+                android:gravity="center"
+                android:fontFamily="@font/product_sans" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:hint="Event Title">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_event_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapWords" />
-            </com.google.android.material.textfield.TextInputLayout>
+            <View
+                android:layout_width="48dp"
+                android:layout_height="48dp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Description">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_event_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="top"
-                    android:lines="4"
-                    android:inputType="textMultiLine|textCapSentences" />
-            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- Main Form Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="@color/apple_glass_background">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:padding="24dp">
 
+                <!-- Event Title -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/calender_icon"
-                    android:hint="Date">
+                    android:layout_marginBottom="16dp"
+                    app:boxBackgroundMode="filled"
+                    app:boxBackgroundColor="@color/apple_glass_background"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:boxStrokeColor="@color/sustainable_green"
+                    app:hintTextColor="@color/apple_text_secondary">
+
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/input_event_date"
+                        android:id="@+id/edit_event_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:focusable="false"
-                        android:cursorVisible="false" />
+                        android:hint="Event Title"
+                        android:textColor="@color/apple_text_primary"
+                        android:textColorHint="@color/apple_text_secondary"
+                        android:fontFamily="@font/product_sans" />
+
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Event Description -->
                 <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/location_icon"
-                    android:hint="Location">
+                    android:layout_marginBottom="16dp"
+                    app:boxBackgroundMode="filled"
+                    app:boxBackgroundColor="@color/apple_glass_background"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:boxStrokeColor="@color/sustainable_green"
+                    app:hintTextColor="@color/apple_text_secondary">
+
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/input_event_location"
+                        android:id="@+id/edit_event_description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textCapWords" />
+                        android:hint="Event Description"
+                        android:minLines="3"
+                        android:gravity="top"
+                        android:textColor="@color/apple_text_primary"
+                        android:textColorHint="@color/apple_text_secondary"
+                        android:fontFamily="@font/product_sans" />
+
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Location -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:boxBackgroundMode="filled"
+                    app:boxBackgroundColor="@color/apple_glass_background"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:boxStrokeColor="@color/sustainable_green"
+                    app:hintTextColor="@color/apple_text_secondary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_event_location"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Location"
+                        android:textColor="@color/apple_text_primary"
+                        android:textColorHint="@color/apple_text_secondary"
+                        android:fontFamily="@font/product_sans" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Image URL -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:boxBackgroundMode="filled"
+                    app:boxBackgroundColor="@color/apple_glass_background"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:boxStrokeColor="@color/sustainable_green"
+                    app:hintTextColor="@color/apple_text_secondary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_image_url"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Image URL (optional)"
+                        android:textColor="@color/apple_text_primary"
+                        android:textColorHint="@color/apple_text_secondary"
+                        android:fontFamily="@font/product_sans" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Date/Time Selection -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_select_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="Select Date and Time"
+                    android:textColor="@color/apple_text_primary"
+                    android:textSize="16sp"
+                    app:backgroundTint="@color/apple_glass_background"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/apple_text_secondary"
+                    app:cornerRadius="16dp"
+                    android:fontFamily="@font/product_sans" />
+
+                <!-- Points and Participants Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        app:boxBackgroundMode="filled"
+                        app:boxBackgroundColor="@color/apple_glass_background"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxStrokeWidth="0dp"
+                        app:boxStrokeWidthFocused="2dp"
+                        app:boxStrokeColor="@color/sustainable_green"
+                        app:hintTextColor="@color/apple_text_secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edit_event_points"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Points Reward"
+                            android:inputType="number"
+                            android:textColor="@color/apple_text_primary"
+                            android:textColorHint="@color/apple_text_secondary"
+                            android:fontFamily="@font/product_sans" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        app:boxBackgroundMode="filled"
+                        app:boxBackgroundColor="@color/apple_glass_background"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxStrokeWidth="0dp"
+                        app:boxStrokeWidthFocused="2dp"
+                        app:boxStrokeColor="@color/sustainable_green"
+                        app:hintTextColor="@color/apple_text_secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edit_max_participants"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Max Participants"
+                            android:inputType="number"
+                            android:textColor="@color/apple_text_primary"
+                            android:textColorHint="@color/apple_text_secondary"
+                            android:fontFamily="@font/product_sans" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_create_event"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginTop="32dp"
-                android:text="Create Event"
-                android:backgroundTint="@color/primary_green"
-                app:cornerRadius="16dp" />
+        </com.google.android.material.card.MaterialCardView>
 
-        </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+        <!-- Create Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_create_event"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Create Event"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/sustainable_green"
+            app:cornerRadius="28dp"
+            android:fontFamily="@font/product_sans" />
+
+    </LinearLayout>
+
+</ScrollView>

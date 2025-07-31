@@ -1,17 +1,28 @@
-package com.informatlux.test
 
-import android.net.Uri
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+package com.informatlux.test.models
 
-@Parcelize
+import java.util.Date
+
 data class Event(
-    val id: String = java.util.UUID.randomUUID().toString(),
-    val title: String,
-    val description: String,
-    val date: String,
-    val location: String,
-    // FIX: Changed this from String to Uri? to correctly handle image paths
-    val bannerUri: Uri?,
-    var isOngoing: Boolean = false
-) : Parcelable
+    val id: String = "",
+    val title: String = "",
+    val description: String = "",
+    val imageUrl: String = "",
+    val createdBy: String = "",
+    val createdAt: Date = Date(),
+    val eventDate: Date? = null,
+    val location: String = "",
+    val pointsReward: Int = 0,
+    val maxParticipants: Int = 0,
+    val status: String = "active",
+    val category: String = "challenge",
+    val participantCount: Int = 0,
+    val isJoined: Boolean = false
+)
+
+data class EventParticipant(
+    val id: String = "",
+    val eventId: String = "",
+    val userId: String = "",
+    val joinedAt: Date = Date()
+)

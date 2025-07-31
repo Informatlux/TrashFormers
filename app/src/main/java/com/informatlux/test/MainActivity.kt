@@ -3,17 +3,14 @@ package com.informatlux.test
 import android.Manifest
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.MediaStore
-import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.view.View
 import android.view.animation.DecelerateInterpolator
-import android.widget.Button
-import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
@@ -33,7 +30,14 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 import java.util.*
-import com.informatlux.test.ScoreManager
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.gotrue.Auth
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.serializer.KotlinXSerializer
+import kotlinx.serialization.json.Json
 
 class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
@@ -42,8 +46,14 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var aiService: AIService // Assuming you have this class in your project
     private var isVoiceModeEnabled = false
     private val conversationHistory = mutableListOf<String>()
-    private val userId = "user1" // Replace with actual user ID logic
-
+    private lateinit var supabase: SupabaseClient
+    private val userId: String by lazy {
+        UserManager.getCurrentUserId()
+    }
+    companion object{
+        private const val SUPABASE_URL = "https://jedpwwxjrsejumyqyrgx.supabase.co"
+        private const val SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImplZHB3d3hqcnNlanVteXF5cmd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4NzYzMzQsImV4cCI6MjA2OTQ1MjMzNH0.x9iFEmjd8ldd_llmc70ZfVqV3BBsUx1MSLnZbFCPlxI"
+    }
     // Your existing ActivityResultLaunchers are preserved.
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -61,9 +71,28 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        UserManager.initialize(application)
         // Initialize services
         textToSpeech = TextToSpeech(this, this)
         aiService = AIService()
+
+        supabase = createSupabaseClient(
+            supabaseUrl = SUPABASE_URL,
+            supabaseKey = SUPABASE_ANON_KEY
+        ) {
+            defaultSerializer = KotlinXSerializer(Json {
+                ignoreUnknownKeys = true
+            })
+
+            install(Auth) {
+                alwaysAutoRefresh = false
+                autoLoadFromStorage = false
+            }
+
+            install(Postgrest) {
+                defaultSchema = "public"
+            }
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -154,18 +183,46 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     private fun displayUserFullName() {
-        val prefs = getSharedPreferences(LoginActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        val firstName = prefs.getString("user_first_name", "") ?: ""
-        val lastName = prefs.getString("user_last_name", "") ?: ""
+        // Launch in a Coroutine (call this from onCreate or similar)
 
-        val fullName = when {
-            firstName.isNotEmpty() && lastName.isNotEmpty() -> "$firstName $lastName"
-            firstName.isNotEmpty() -> firstName
-            lastName.isNotEmpty() -> lastName
-            else -> "User"
+        lifecycleScope.launch {
+            try {
+                // 1. Get authenticated user's ID
+                val session = supabase.auth.currentSessionOrNull()
+                val userId = session?.user?.id
+                if (userId == null) {
+                    findViewById<TextView>(R.id.user_name_text).text = "User"
+                    return@launch
+                }
+
+                // 2. Query Supabase "profiles" table for this user ID
+                val result = supabase
+                    .postgrest["profiles"]
+                    .select {
+                        filter { eq("id", userId) }
+                        limit(1)
+                    }
+                    .decodeList<Map<String, Any>>() // use your data model if you have one
+
+                if (result.isNotEmpty()) {
+                    val user = result.first()
+                    val firstName = user["first_name"] as? String ?: ""
+                    val lastName = user["last_name"] as? String ?: ""
+                    val fullName = when {
+                        firstName.isNotEmpty() && lastName.isNotEmpty() -> "$firstName $lastName"
+                        firstName.isNotEmpty() -> firstName
+                        lastName.isNotEmpty() -> lastName
+                        else -> "User"
+                    }
+                    findViewById<TextView>(R.id.user_name_text).text = fullName
+                } else {
+                    findViewById<TextView>(R.id.user_name_text).text = "User"
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error fetching user profile", e)
+                findViewById<TextView>(R.id.user_name_text).text = "User"
+            }
         }
-
-        findViewById<TextView>(R.id.user_name_text).text = fullName
     }
 
 

@@ -14,12 +14,11 @@ import java.io.ByteArrayOutputStream
 object DeepSeekService {
     private const val TAG = "DeepSeekService"
     private const val API_URL = "https://openrouter.ai/api/v1/chat/completions"
-    private const val API_KEY = "Bearer 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"
+    private const val API_KEY = "Bearer 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"
+    private const val MAX_IMAGE_DIM = 256 // <= Resize images to a max of 256px (width or height)
 
-    // Language enforcement append (hidden from user)
+    // Context and language hints
     private const val LANGUAGE_ENFORCEMENT = "\n\nIMPORTANT: Please respond ONLY in English language. Do not use Chinese, Japanese, Korean, or any other language. All responses must be in clear, proper English."
-
-    // Waste management context append (also hidden from user)
     private const val CONTEXT_APPEND = "\n\nContext: You are an AI assistant specialized in waste management, recycling, and environmental sustainability. Provide practical, actionable advice. Format your response with proper line breaks, bullet points, and clear structure."
 
     private val client = OkHttpClient()
@@ -77,20 +76,35 @@ object DeepSeekService {
         // Start with user's original prompt
         contentBuilder.append(userPrompt)
 
-        // Add image data if present
+        // Add image data if present, resizing it first
         if (imageBitmap != null) {
-            Log.d(TAG, "Adding image data to prompt")
-            val base64Image = bitmapToBase64(imageBitmap)
+            Log.d(TAG, "Resizing and adding image data to prompt")
+            val resized = resizeBitmap(imageBitmap, MAX_IMAGE_DIM)
+            val base64Image = bitmapToBase64(resized)
             contentBuilder.append("\n\nImage data: data:image/jpeg;base64,$base64Image")
         }
 
-        // Add context for waste management
+        // Add context and language guidance
         contentBuilder.append(CONTEXT_APPEND)
-
-        // Add language enforcement (most important - put at end for emphasis)
         contentBuilder.append(LANGUAGE_ENFORCEMENT)
 
         return contentBuilder.toString()
+    }
+
+    /** Resize a bitmap to fit within maxDimension (if needed). Keeps aspect ratio. */
+    private fun resizeBitmap(bitmap: Bitmap, maxDimension: Int): Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+        if (width <= maxDimension && height <= maxDimension) return bitmap
+
+        val ratio = Math.min(
+            maxDimension.toFloat() / width,
+            maxDimension.toFloat() / height
+        )
+        val newWidth = (width * ratio).toInt()
+        val newHeight = (height * ratio).toInt()
+        Log.d(TAG, "Resizing bitmap from ${width}x$height to ${newWidth}x${newHeight}")
+        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
     }
 
     private fun parseResponse(responseBody: String): String {
@@ -129,7 +143,7 @@ object DeepSeekService {
         return this
             .replace(Regex("[#*`_~]"), "") // Remove markdown formatting
             .replace(Regex("\\[([^\\]]+)\\]\\([^)]+\\)"), "$1") // Convert links to just text
-            .replace(Regex("```[\\s\\S]*?```"), "") // Remove code blocks
+            .replace(Regex("``````"), "") // Remove code blocks
             .replace(Regex("`([^`]+)`"), "$1") // Remove inline code formatting
             .trim()
     }
@@ -146,7 +160,7 @@ object DeepSeekService {
             .takeIf { it.isNotBlank() } ?: "I apologize, but I couldn't generate a proper English response. Please try rephrasing your question."
     }
 
-    // NEW: Response formatting function
+    // Response formatting function
     private fun String.formatResponse(): String {
         Log.d(TAG, "Formatting response: ${this.take(100)}...")
 

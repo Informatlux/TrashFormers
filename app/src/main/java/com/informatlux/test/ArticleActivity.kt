@@ -6,6 +6,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
 import android.widget.Toast
@@ -13,24 +14,61 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import com.informatlux.test.ScoreManager
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.gotrue.Auth
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.serializer.KotlinXSerializer
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 class ArticleActivity : AppCompatActivity() {
 
-    private val userId = "user1" // Replace with actual user ID logic
+    private lateinit var supabase: SupabaseClient
+    private val userId: String by lazy {
+        UserManager.getCurrentUserId()
+    }
+
+    companion object{
+        private const val SUPABASE_URL = "https://jedpwwxjrsejumyqyrgx.supabase.co"
+        private const val SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImplZHB3d3hqcnNlanVteXF5cmd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4NzYzMzQsImV4cCI6MjA2OTQ1MjMzNH0.x9iFEmjd8ldd_llmc70ZfVqV3BBsUx1MSLnZbFCPlxI"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_article)
+        UserManager.initialize(application)
 
         // Handles the status bar padding for edge-to-edge display
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
             insets
+        }
+
+        supabase = createSupabaseClient(
+            supabaseUrl = SUPABASE_URL,
+            supabaseKey = SUPABASE_ANON_KEY
+        ) {
+            defaultSerializer = KotlinXSerializer(Json {
+                ignoreUnknownKeys = true
+            })
+
+            install(Auth) {
+                alwaysAutoRefresh = false
+                autoLoadFromStorage = false
+            }
+
+            install(Postgrest) {
+                defaultSchema = "public"
+            }
         }
 
         setupClickListeners()
@@ -109,18 +147,46 @@ class ArticleActivity : AppCompatActivity() {
     }
 
     private fun displayUserFullName() {
-        val prefs = getSharedPreferences(LoginActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        val firstName = prefs.getString("user_first_name", "") ?: ""
-        val lastName = prefs.getString("user_last_name", "") ?: ""
+        // Launch in a Coroutine (call this from onCreate or similar)
 
-        val fullName = when {
-            firstName.isNotEmpty() && lastName.isNotEmpty() -> "$firstName $lastName"
-            firstName.isNotEmpty() -> firstName
-            lastName.isNotEmpty() -> lastName
-            else -> "User"
+        lifecycleScope.launch {
+            try {
+                // 1. Get authenticated user's ID
+                val session = supabase.auth.currentSessionOrNull()
+                val userId = session?.user?.id
+                if (userId == null) {
+                    findViewById<TextView>(R.id.user_name_text).text = "User"
+                    return@launch
+                }
+
+                // 2. Query Supabase "profiles" table for this user ID
+                val result = supabase
+                    .postgrest["profiles"]
+                    .select {
+                        filter { eq("id", userId) }
+                        limit(1)
+                    }
+                    .decodeList<Map<String, Any>>() // use your data model if you have one
+
+                if (result.isNotEmpty()) {
+                    val user = result.first()
+                    val firstName = user["first_name"] as? String ?: ""
+                    val lastName = user["last_name"] as? String ?: ""
+                    val fullName = when {
+                        firstName.isNotEmpty() && lastName.isNotEmpty() -> "$firstName $lastName"
+                        firstName.isNotEmpty() -> firstName
+                        lastName.isNotEmpty() -> lastName
+                        else -> "User"
+                    }
+                    findViewById<TextView>(R.id.user_name_text).text = fullName
+                } else {
+                    findViewById<TextView>(R.id.user_name_text).text = "User"
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error fetching user profile", e)
+                findViewById<TextView>(R.id.user_name_text).text = "User"
+            }
         }
-
-        findViewById<TextView>(R.id.user_name_text).text = fullName
     }
 
     private fun showToast(message: String) {
